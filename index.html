@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Shanthi Tours — Tour Operations Management</title>
+  
+  <!-- Inter Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-subtle: #eff6ff;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-focus: #3b82f6;
+      
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+
+      --sidebar-w: 240px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #090d16;
+        --surface: #131c2e;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #223049;
+        --border-focus: #3b82f6;
+        --primary-subtle: #1e293b;
+        --success-bg: #052e16;
+        --success-border: #14532d;
+        --warning-bg: #451a03;
+        --warning-border: #78350f;
+        --danger-bg: #450a0a;
+        --danger-border: #7f1d1d;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Sidebar Navigation (Desktop) */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 40;
+    }
+    .sidebar-header {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .sidebar-nav {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover {
+      background: var(--primary-subtle);
+      color: var(--text);
+    }
+    .nav-link.active {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* App Main Layout */
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding-bottom: 80px;
+    }
+    .app-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .connection-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+    }
+    .conn-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .content-container {
+      padding: 24px;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Mobile Bottom Navigation */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .mobile-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 100%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .mobile-nav-item.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 40px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-sm { height: 32px; padding: 0 10px; font-size: 12px; border-radius: var(--radius-sm); }
+    .btn-wa { background: #25d366; color: #fff; }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border: 1px solid transparent;
+    }
+    .badge-local { background: #f3e8ff; color: #7c3aed; border-color: #e9d5ff; }
+    .badge-train { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+    .badge-intl  { background: #d1fae5; color: #059669; border-color: #a7f3d0; }
+    .badge-avail { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
+    .badge-nearly { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-border); }
+    .badge-full  { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
+    .badge-neutral { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
+
+    /* Inputs & Selects */
+    .field-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block; }
+    .field-input, .field-select, .field-textarea {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus, .field-select:focus, .field-textarea:focus {
+      border-color: var(--border-focus);
+    }
+    .field-textarea { height: 75px; padding: 8px 12px; resize: vertical; }
+
+    /* FILTERS TOOLBAR (Fixed Clean Row) */
+    .filters-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrap {
+      flex: 2;
+      min-width: 260px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-icon-svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-input-wrap .field-input {
+      padding-left: 36px;
+      width: 100%;
+    }
+    .filters-bar .field-select {
+      flex: 1;
+      min-width: 150px;
+      width: auto;
+    }
+
+    /* Trips Grid */
+    .trips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+    .trip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    }
+    .trip-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .trip-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .trip-card-title { font-size: 16px; font-weight: 700; }
+    .trip-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .trip-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .trip-card-meta strong { color: var(--text); }
+
+    /* Capacity Progress Bar */
+    .capacity-track {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .capacity-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .capacity-fill.full { background: var(--danger); }
+    .capacity-fill.nearly { background: var(--warning); }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: var(--bg);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Modal / Sheets */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+      padding: 16px;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-modal);
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 2;
+    }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--surface);
+      position: sticky;
+      bottom: 0;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    @media print {
+      .sidebar, .app-topbar, .mobile-bottom-nav, .filters-bar, .btn, .no-print { display: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+      .content-container { padding: 0 !important; max-width: 100% !important; }
+      .card { border: none !important; box-shadow: none !important; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .mobile-bottom-nav { display: flex; }
+      .content-container { padding: 14px; }
+      .trips-grid { grid-template-columns: 1fr; }
+      .modal-backdrop { align-items: flex-end; padding: 0; }
+      .modal-box { border-radius: var(--radius-xl) var(--radius-xl) 0 0; max-height: 85vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Desktop Sidebar -->
+  <aside class="sidebar no-print">
+    <div class="sidebar-header">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary);"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span class="sidebar-title">Shanthi Tours</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-link active" onclick="app.navigate('trips')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+        <span>Trips</span>
+      </button>
+      <button class="nav-link" onclick="app.navigate('passengers')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Passengers</span>
+      </button>
+      <button class="nav-link" onclick="app.navigate('reports')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Reports & Dues</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottom-nav no-print">
+    <button id="mNavTrips" class="mobile-nav-item active" onclick="app.navigate('trips')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
+      <span>Trips</span>
+    </button>
+    <button id="mNavPassengers" class="mobile-nav-item" onclick="app.navigate('passengers')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <span>Passengers</span>
+    </button>
+    <button id="mNavReports" class="mobile-nav-item" onclick="app.navigate('reports')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/></svg>
+      <span>Reports</span>
+    </button>
+  </nav>
+
+  <!-- Main Work Area -->
+  <div class="app-main">
+    <header class="app-topbar no-print">
+      <div class="topbar-left">
+        <h1 class="topbar-title" id="pageHeaderTitle">Trips Overview</h1>
+      </div>
+      <div class="connection-badge">
+        <div class="conn-dot"></div>
+        <span>Connected</span>
+      </div>
+    </header>
+
+    <main class="content-container">
+
+      <!-- ================= VIEW: TRIPS ================= -->
+      <section id="viewTrips">
+        <div class="card-header-row">
+          <div style="font-size:13px; color:var(--text-muted);">Operationally manage upcoming & completed tours</div>
+          <button class="btn btn-primary" onclick="app.modal.openCreateTrip()">
+            <span>+ Create Trip</span>
+          </button>
+        </div>
+
+        <!-- Clean Toolbar & Search Row (Fixed layout) -->
+        <div class="filters-bar">
+          <div class="search-input-wrap">
+            <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="tripSearch" class="field-input" placeholder="Search trips by destination or name..." oninput="app.renderTrips()" />
+          </div>
+          <select id="filterType" class="field-select" onchange="app.renderTrips()">
+            <option value="ALL">All Categories</option>
+            <option value="Local">Local</option>
+            <option value="Train/Flight">Train/Flight</option>
+            <option value="International">International</option>
+          </select>
+          <select id="filterCapacity" class="field-select" onchange="app.renderTrips()">
+            <option value="ALL">All Capacities</option>
+            <option value="AVAILABLE">Available</option>
+            <option value="NEARLY_FULL">Nearly Full (≥80%)</option>
+            <option value="FULL">Full (100%)</option>
+          </select>
+          <select id="filterSort" class="field-select" onchange="app.renderTrips()">
+            <option value="DEPARTURE_NEAR">Departure (Nearest First)</option>
+            <option value="NEWEST">Recently Added</option>
+            <option value="PRICE_DESC">Price (High to Low)</option>
+          </select>
+        </div>
+
+        <!-- Trips 2-Card Grid -->
+        <div id="tripsGridContainer" class="trips-grid">
+          <div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">Loading tour data...</div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: TRIP DETAIL ================= -->
+      <section id="viewTripDetail" style="display:none;">
+        <div class="no-print" style="margin-bottom: 14px;">
+          <button class="btn btn-secondary btn-sm" onclick="app.navigate('trips')">← Back to Trips</button>
+        </div>
+
+        <div id="tripDetailHeaderCard" class="card"></div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <div>
+              <h3 class="card-title">Passenger Manifest & Roster</h3>
+              <div id="detailPaxCountSub" style="font-size:12px; color:var(--text-muted);">0 Booked</div>
+            </div>
+            <div class="no-print" style="display:flex; gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="app.exportPassengersCSV()">Export CSV</button>
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">Print Manifest</button>
+              <button class="btn btn-primary btn-sm" onclick="app.modal.openAddPassenger()">+ Add Passenger</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Seat</th>
+                  <th>Passenger</th>
+                  <th>Phone</th>
+                  <th>Gender / Age</th>
+                  <th>ID Verification</th>
+                  <th>Payment Status</th>
+                  <th class="no-print" style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="detailPaxTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: PASSENGERS ================= -->
+      <section id="viewPassengers" style="display:none;">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Customer Directory & Travel History</h2>
+            <div style="font-size:12px; color:var(--text-muted);">Consolidated passenger records across all scheduled tours</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th style="text-align:center;">Trips Count</th>
+                <th>Tour History</th>
+                <th>Total Revenue Generated</th>
+              </tr>
+            </thead>
+            <tbody id="globalPaxTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: REPORTS ================= -->
+      <section id="viewReports" style="display:none;">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Financial & Outstanding Dues Report</h2>
+            <div style="font-size:12px; color:var(--text-muted);">Accounts receivable and collection reminders</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:18px;">
+          <div class="card" style="margin-bottom:0;">
+            <span class="field-label">Total Expected</span>
+            <div id="kpiExpected" style="font-size:22px; font-weight:800; margin-top:4px;">₹0</div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <span class="field-label">Collected</span>
+            <div id="kpiCollected" style="font-size:22px; font-weight:800; color:var(--success); margin-top:4px;">₹0</div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <span class="field-label">Outstanding Dues</span>
+            <div id="kpiDues" style="font-size:22px; font-weight:800; color:var(--danger); margin-top:4px;">₹0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h3 class="card-title" style="color:var(--danger);">Outstanding Balances (Sorted by Highest Due)</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Passenger</th>
+                  <th>Contact</th>
+                  <th>Tour</th>
+                  <th>Departure</th>
+                  <th>Balance Due (₹)</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="reportsDuesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal: Create / Edit Trip -->
+  <div id="modalTrip" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTripTitle" class="card-title">Create Tour</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.modal.close('modalTrip')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formTripId" />
+        <div style="margin-bottom:12px;">
+          <label class="field-label">Tour Title *</label>
+          <input type="text" id="tripFormName" class="field-input" placeholder="e.g. Kashmir Autumn Tour" />
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <label class="field-label">Tour Category *</label>
+            <select id="tripFormType" class="field-select">
+              <option value="Local">Local</option>
+              <option value="Train/Flight">Train/Flight</option>
+              <option value="International">International</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Departure Date *</label>
+            <input type="date" id="tripFormDate" class="field-input" />
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <label class="field-label">Package Cost Per Person (₹) *</label>
+            <input type="number" id="tripFormAmount" class="field-input" placeholder="15000" />
+          </div>
+          <div>
+            <label class="field-label">Total Seats *</label>
+            <input type="number" id="tripFormSeats" class="field-input" placeholder="20" />
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Operational Notes</label>
+          <textarea id="tripFormNotes" class="field-textarea" placeholder="Pickup location, guidelines..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="app.modal.close('modalTrip')">Cancel</button>
+        <button class="btn btn-primary" onclick="app.saveTrip()">Save Tour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Passenger -->
+  <div id="modalPassenger" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalPaxTitle" class="card-title">Add Passenger</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.modal.close('modalPassenger')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formPaxTripId" />
+        <input type="hidden" id="formPaxIndex" value="-1" />
+        <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <label class="field-label">Seat # *</label>
+            <input type="text" id="paxFormSeat" class="field-input" placeholder="12A" />
+          </div>
+          <div>
+            <label class="field-label">Full Name *</label>
+            <input type="text" id="paxFormName" class="field-input" placeholder="Passenger Name" />
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <label class="field-label">Phone Number *</label>
+            <input type="tel" id="paxFormPhone" class="field-input" placeholder="10 Digits" />
+          </div>
+          <div>
+            <label class="field-label">Gender</label>
+            <select id="paxFormGender" class="field-select">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="paxNonLocalFields" style="display:none;">
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label class="field-label">Date of Birth</label>
+              <input type="date" id="paxFormDob" class="field-input" />
+            </div>
+            <div>
+              <label class="field-label">Live Age</label>
+              <input type="text" id="paxFormAge" class="field-input" readonly style="background:var(--bg);" placeholder="-" />
+            </div>
+          </div>
+          <div id="fieldAadhaarWrap" style="display:none; margin-bottom:12px;">
+            <label class="field-label">Aadhaar Number</label>
+            <input type="text" id="paxFormAadhaar" class="field-input" placeholder="12-digit Aadhaar ID" />
+          </div>
+          <div id="fieldPassportWrap" style="display:none; margin-bottom:12px;">
+            <label class="field-label">Passport Number</label>
+            <input type="text" id="paxFormPassport" class="field-input" placeholder="Passport No" />
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" id="paxPaymentLabel">Amount Paid (₹)</label>
+          <input type="number" id="paxFormPayment" class="field-input" placeholder="0" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="app.modal.close('modalPassenger')">Cancel</button>
+        <button class="btn btn-primary" onclick="app.savePassenger()">Save Passenger</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Root -->
+  <div id="toastRoot" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script>
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCsbSo8KC_Gqwoyy236Hjq266idEOeUOfs",
+      authDomain: "shanthi-tours.firebaseapp.com",
+      projectId: "shanthi-tours",
+      storageBucket: "shanthi-tours.firebasestorage.app",
+      messagingSenderId: "629519666023",
+      appId: "1:629519666023:web:f9db1b5d80d413e755fdc2",
+      measurementId: "G-63NBK0K5S9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const app = {
+      trips: [],
+      activeTripId: null,
+      currentView: 'trips',
+
+      init() {
+        this.listenToTrips();
+        document.getElementById("paxFormDob").addEventListener("change", (e) => {
+          document.getElementById("paxFormAge").value = app.calculateAge(e.target.value);
+        });
+      },
+
+      listenToTrips() {
+        db.collection("trips").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+          app.trips = [];
+          snapshot.forEach(doc => {
+            app.trips.push({ id: doc.id, ...doc.data() });
+          });
+          app.renderActiveView();
+        });
+      },
+
+      navigate(viewId) {
+        app.currentView = viewId;
+        ['viewTrips', 'viewTripDetail', 'viewPassengers', 'viewReports'].forEach(v => {
+          document.getElementById(v).style.display = 'none';
+        });
+
+        document.querySelectorAll('.sidebar .nav-link').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mobile-bottom-nav .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
+
+        const titleMap = {
+          'trips': 'Trips Overview',
+          'tripDetail': 'Tour Workspace',
+          'passengers': 'Customer Directory',
+          'reports': 'Financial & Operations Reports'
+        };
+        document.getElementById("pageHeaderTitle").textContent = titleMap[viewId] || 'Shanthi Tours';
+
+        if (viewId === 'trips') {
+          document.getElementById('viewTrips').style.display = 'block';
+          app.renderTrips();
+        } else if (viewId === 'tripDetail') {
+          document.getElementById('viewTripDetail').style.display = 'block';
+          app.renderTripDetail();
+        } else if (viewId === 'passengers') {
+          document.getElementById('viewPassengers').style.display = 'block';
+          app.renderGlobalPassengers();
+        } else if (viewId === 'reports') {
+          document.getElementById('viewReports').style.display = 'block';
+          app.renderReports();
+        }
+      },
+
+      renderActiveView() {
+        if (app.currentView === 'trips') app.renderTrips();
+        else if (app.currentView === 'tripDetail') app.renderTripDetail();
+        else if (app.currentView === 'passengers') app.renderGlobalPassengers();
+        else if (app.currentView === 'reports') app.renderReports();
+      },
+
+      renderTrips() {
+        const container = document.getElementById("tripsGridContainer");
+        const search = (document.getElementById("tripSearch").value || "").toLowerCase().trim();
+        const filterType = document.getElementById("filterType").value;
+        const filterCap = document.getElementById("filterCapacity").value;
+        const filterSort = document.getElementById("filterSort").value;
+
+        let filtered = app.trips.filter(t => {
+          const nameMatch = !search || (t.name || '').toLowerCase().includes(search);
+          const typeMatch = filterType === 'ALL' || (t.type || 'Local') === filterType;
+          const totalSeats = parseInt(t.totalSeats, 10) || 0;
+          const filled = (t.members || []).length;
+          const ratio = totalSeats > 0 ? filled / totalSeats : 0;
+
+          let capMatch = true;
+          if (filterCap === 'AVAILABLE') capMatch = ratio < 0.8;
+          else if (filterCap === 'NEARLY_FULL') capMatch = ratio >= 0.8 && ratio < 1;
+          else if (filterCap === 'FULL') capMatch = ratio >= 1;
+
+          return nameMatch && typeMatch && capMatch;
+        });
+
+        filtered.sort((a, b) => {
+          if (filterSort === 'DEPARTURE_NEAR') return (a.date || '9999').localeCompare(b.date || '9999');
+          if (filterSort === 'NEWEST') return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+          if (filterSort === 'PRICE_DESC') return (b.amount || 0) - (a.amount || 0);
+          return 0;
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">No tours found.</div>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map(t => {
+          const type = t.type || 'Local';
+          const totalSeats = parseInt(t.totalSeats, 10) || 0;
+          const members = t.members || [];
+          const filled = members.length;
+          const capPct = totalSeats > 0 ? Math.min(100, Math.round((filled / totalSeats) * 100)) : 0;
+          const price = parseFloat(t.amount) || 0;
+
+          let badgeCatClass = 'badge-local';
+          if (type === 'Train/Flight') badgeCatClass = 'badge-train';
+          if (type === 'International') badgeCatClass = 'badge-intl';
+
+          let capBadge = 'badge-avail';
+          let fillClass = '';
+          if (capPct >= 100) { capBadge = 'badge-full'; fillClass = 'full'; }
+          else if (capPct >= 80) { capBadge = 'badge-nearly'; fillClass = 'nearly'; }
+
+          return `
+            <div class="trip-card" onclick="app.openTripDetail('${t.id}')">
+              <div>
+                <div class="trip-card-top">
+                  <h3 class="trip-card-title">${escapeHtml(t.name)}</h3>
+                  <span class="badge ${badgeCatClass}">${escapeHtml(type)}</span>
+                </div>
+                <div class="trip-card-badges">
+                  <span class="badge ${capBadge}">${totalSeats > 0 ? `${filled}/${totalSeats} Seats` : `${filled} Booked`}</span>
+                  <span class="badge badge-neutral">${t.date ? t.date : 'Date TBD'}</span>
+                </div>
+                <div class="trip-card-meta">
+                  <div>Departure: <strong>${t.date || 'TBD'}</strong></div>
+                  <div>Cost: <strong>₹${price.toLocaleString('en-IN')}</strong></div>
+                </div>
+              </div>
+
+              <div>
+                ${totalSeats > 0 ? `
+                  <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px; font-weight:600; color:var(--text-muted);">
+                    <span>Capacity</span>
+                    <span>${capPct}%</span>
+                  </div>
+                  <div class="capacity-track">
+                    <div class="capacity-fill ${fillClass}" style="width:${capPct}%;"></div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      openTripDetail(tripId) {
+        app.activeTripId = tripId;
+        app.navigate('tripDetail');
+      },
+
+      renderTripDetail() {
+        const trip = app.trips.find(t => t.id === app.activeTripId);
+        if (!trip) return app.navigate('trips');
+
+        const members = trip.members || [];
+        const tripPrice = parseFloat(trip.amount) || 0;
+        const totalSeats = parseInt(trip.totalSeats, 10) || 0;
+        const filled = members.length;
+        const expectedTotal = filled * tripPrice;
+
+        let totalCollected = 0;
+        members.forEach(m => {
+          totalCollected += (trip.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0));
+        });
+        const outstanding = Math.max(0, expectedTotal - totalCollected);
+
+        document.getElementById("tripDetailHeaderCard").innerHTML = `
+          <div class="card-header-row">
+            <div>
+              <h2 style="font-size:20px; font-weight:800;">${escapeHtml(trip.name)}</h2>
+              <div style="font-size:12px; color:var(--text-muted);">
+                ${escapeHtml(trip.type || 'Local')} • Departure: ${trip.date || 'TBD'}
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="app.modal.openEditTrip('${trip.id}')">Edit Tour</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.duplicateTrip('${trip.id}')">Duplicate</button>
+              <button class="btn btn-danger btn-sm" onclick="app.deleteTrip('${trip.id}', '${escapeHtml(trip.name)}')">Delete</button>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; padding:12px 0; border-top:1px solid var(--border);">
+            <div><span class="field-label">Booked</span><strong>${filled} / ${totalSeats || '∞'} Seats</strong></div>
+            <div><span class="field-label">Collected</span><strong style="color:var(--success);">₹${totalCollected.toLocaleString('en-IN')}</strong></div>
+            <div><span class="field-label">Outstanding</span><strong style="color:var(--danger);">₹${outstanding.toLocaleString('en-IN')}</strong></div>
+          </div>
+        `;
+
+        document.getElementById("detailPaxCountSub").textContent = `${members.length} Confirmed Passengers`;
+        const tbody = document.getElementById("detailPaxTableBody");
+
+        if (members.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">No passengers added yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = members.map((m, index) => {
+          const paid = trip.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
+          const balance = Math.max(0, tripPrice - paid);
+          const isFullyPaid = balance === 0;
+
+          const cleanPhone = (m.phone || '').replace(/[^0-9]/g, '');
+          const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+          const waMsg = encodeURIComponent(`Hi ${m.name}, outstanding balance for "${trip.name}": ₹${balance}. Thank you!`);
+
+          return `
+            <tr>
+              <td><strong>#${escapeHtml(m.seat || '-')}</strong></td>
+              <td><strong>${escapeHtml(m.name || 'Unnamed')}</strong></td>
+              <td>${escapeHtml(m.phone || '-')}</td>
+              <td>${escapeHtml(m.gender || '-')} / ${m.dob ? app.calculateAge(m.dob) : '-'}</td>
+              <td><span class="badge badge-neutral">${trip.type === 'Train/Flight' ? (m.aadhaar ? '[Aadhaar Redacted]' : 'No ID') : (trip.type === 'International' ? (m.passport || 'No Passport') : 'Verified')}</span></td>
+              <td>
+                <span class="badge ${isFullyPaid ? 'badge-avail' : 'badge-nearly'}">
+                  ${isFullyPaid ? 'Paid' : `Due ₹${balance.toLocaleString('en-IN')}`}
+                </span>
+              </td>
+              <td class="no-print" style="text-align:right;">
+                ${cleanPhone ? `<a href="https://wa.me/${waPhone}?text=${waMsg}" target="_blank" class="btn btn-wa btn-sm">WA</a>` : ''}
+                <button class="btn btn-secondary btn-sm" onclick="app.modal.openEditPassenger('${trip.id}', ${index})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="app.deletePassenger('${trip.id}', ${index})">✕</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      savePassenger() {
+        const tripId = document.getElementById("formPaxTripId").value;
+        const editIdx = parseInt(document.getElementById("formPaxIndex").value, 10);
+        const name = document.getElementById("paxFormName").value.trim();
+        const seat = document.getElementById("paxFormSeat").value.trim().toUpperCase();
+        const phone = document.getElementById("paxFormPhone").value.trim();
+        const gender = document.getElementById("paxFormGender").value;
+
+        if (!name || !seat) return app.toast("Name and Seat are required");
+
+        const tripRef = db.collection("trips").doc(tripId);
+
+        db.runTransaction(transaction => {
+          return transaction.get(tripRef).then(doc => {
+            if (!doc.exists) return;
+            const data = doc.data();
+            const members = data.members || [];
+
+            let memberObj = { name, seat, phone, gender };
+            if (data.type === 'Local') {
+              memberObj.amountPaid = parseFloat(document.getElementById("paxFormPayment").value) || 0;
+            } else {
+              memberObj.dob = document.getElementById("paxFormDob").value;
+              memberObj.advance = parseFloat(document.getElementById("paxFormPayment").value) || 0;
+              if (data.type === 'Train/Flight') memberObj.aadhaar = document.getElementById("paxFormAadhaar").value.trim();
+              if (data.type === 'International') memberObj.passport = document.getElementById("paxFormPassport").value.trim();
+            }
+
+            if (editIdx >= 0) members[editIdx] = { ...members[editIdx], ...memberObj };
+            else members.push(memberObj);
+
+            transaction.update(tripRef, { members });
+          });
+        }).then(() => {
+          app.modal.close('modalPassenger');
+          app.toast("Passenger record saved");
+        });
+      },
+
+      deletePassenger(tripId, index) {
+        if (!confirm("Remove this passenger?")) return;
+        const tripRef = db.collection("trips").doc(tripId);
+        db.runTransaction(transaction => {
+          return transaction.get(tripRef).then(doc => {
+            const members = doc.data().members || [];
+            members.splice(index, 1);
+            transaction.update(tripRef, { members });
+          });
+        }).then(() => app.toast("Passenger removed"));
+      },
+
+      saveTrip() {
+        const id = document.getElementById("formTripId").value;
+        const name = document.getElementById("tripFormName").value.trim();
+        const type = document.getElementById("tripFormType").value;
+        const date = document.getElementById("tripFormDate").value;
+        const amount = parseFloat(document.getElementById("tripFormAmount").value) || 0;
+        const totalSeats = parseInt(document.getElementById("tripFormSeats").value, 10) || 0;
+        const notes = document.getElementById("tripFormNotes").value.trim();
+
+        if (!name || !date) return app.toast("Tour Title and Date are required");
+
+        const payload = {
+          name, type, date, amount, totalSeats, notes,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (id) {
+          db.collection("trips").doc(id).update(payload).then(() => {
+            app.modal.close('modalTrip');
+            app.toast("Tour updated");
+          });
+        } else {
+          payload.status = 'Ongoing';
+          payload.members = [];
+          payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          db.collection("trips").add(payload).then(() => {
+            app.modal.close('modalTrip');
+            app.toast("Tour created");
+          });
+        }
+      },
+
+      duplicateTrip(tripId) {
+        const source = app.trips.find(t => t.id === tripId);
+        if (!source) return;
+        const newTitle = prompt("Duplicate tour title:", source.name + " (Copy)");
+        if (!newTitle) return;
+
+        db.collection("trips").add({
+          name: newTitle.trim(),
+          type: source.type || 'Local',
+          date: source.date || '',
+          amount: source.amount || 0,
+          totalSeats: source.totalSeats || 0,
+          notes: source.notes || '',
+          status: 'Ongoing',
+          members: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => app.toast("Duplicated tour created"));
+      },
+
+      deleteTrip(tripId, tripName) {
+        if (!confirm(`Permanently delete "${tripName}"?`)) return;
+        db.collection("trips").doc(tripId).delete().then(() => {
+          app.toast("Tour deleted");
+          app.navigate('trips');
+        });
+      },
+
+      renderGlobalPassengers() {
+        const tbody = document.getElementById("globalPaxTableBody");
+        let customerMap = {};
+
+        app.trips.forEach(t => {
+          (t.members || []).forEach(m => {
+            const key = (m.phone && m.phone.trim()) ? m.phone.replace(/[^0-9]/g, '') : (m.name || 'Unnamed').toLowerCase().trim();
+            const paid = t.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
+
+            if (!customerMap[key]) {
+              customerMap[key] = { name: m.name || 'Unnamed', phone: m.phone || '-', trips: [], totalPaid: 0 };
+            }
+            if (!customerMap[key].trips.includes(t.name)) customerMap[key].trips.push(t.name);
+            customerMap[key].totalPaid += paid;
+          });
+        });
+
+        const list = Object.values(customerMap);
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No passenger history found.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = list.map(c => `
+          <tr>
+            <td><strong>${escapeHtml(c.name)}</strong></td>
+            <td>${escapeHtml(c.phone)}</td>
+            <td style="text-align:center;"><span class="badge badge-avail">${c.trips.length} Tours</span></td>
+            <td style="color:var(--text-muted); font-size:12px;">${escapeHtml(c.trips.join(', '))}</td>
+            <td style="font-weight:700; color:var(--success);">₹${c.totalPaid.toLocaleString('en-IN')}</td>
+          </tr>
+        `).join('');
+      },
+
+      renderReports() {
+        let totalExpected = 0, totalCollected = 0, totalDues = 0, overdueList = [];
+
+        app.trips.forEach(t => {
+          const members = t.members || [];
+          const price = parseFloat(t.amount) || 0;
+          members.forEach(m => {
+            const paid = t.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
+            const due = Math.max(0, price - paid);
+            totalExpected += price;
+            totalCollected += paid;
+            totalDues += due;
+
+            if (due > 0) overdueList.push({ name: m.name, phone: m.phone, tripName: t.name, tripDate: t.date, due });
+          });
+        });
+
+        document.getElementById("kpiExpected").textContent = '₹' + totalExpected.toLocaleString('en-IN');
+        document.getElementById("kpiCollected").textContent = '₹' + totalCollected.toLocaleString('en-IN');
+        document.getElementById("kpiDues").textContent = '₹' + totalDues.toLocaleString('en-IN');
+
+        overdueList.sort((a, b) => b.due - a.due);
+        const tbody = document.getElementById("reportsDuesTableBody");
+
+        if (overdueList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--success);">All balances cleared!</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = overdueList.map(o => {
+          const cleanPhone = (o.phone || '').replace(/[^0-9]/g, '');
+          const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+          const msg = encodeURIComponent(`Hello ${o.name}, friendly reminder from Shanthi Tours for "${o.tripName}". Outstanding due: ₹${o.due}.`);
+
+          return `
+            <tr>
+              <td><strong>${escapeHtml(o.name)}</strong></td>
+              <td>${escapeHtml(o.phone || '-')}</td>
+              <td>${escapeHtml(o.tripName)}</td>
+              <td>${escapeHtml(o.tripDate || 'TBD')}</td>
+              <td style="color:var(--danger); font-weight:700;">₹${o.due.toLocaleString('en-IN')}</td>
+              <td style="text-align:right;">
+                ${cleanPhone ? `<a href="https://wa.me/${waPhone}?text=${msg}" target="_blank" class="btn btn-wa btn-sm">💬 Remind</a>` : '-'}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      exportPassengersCSV() {
+        const trip = app.trips.find(t => t.id === app.activeTripId);
+        if (!trip) return;
+        let csv = "Seat,Name,Phone,Gender,Amount Paid\n";
+        (trip.members || []).forEach(m => {
+          const paid = trip.type === 'Local' ? (m.amountPaid || 0) : (m.advance || 0);
+          csv += `"${m.seat || ''}","${m.name || ''}","${m.phone || ''}","${m.gender || ''}",${paid}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${trip.name}_manifest.csv`;
+        a.click();
+      },
+
+      calculateAge(dobStr) {
+        if (!dobStr) return '-';
+        const b = new Date(dobStr);
+        if (isNaN(b.getTime())) return '-';
+        const today = new Date();
+        let age = today.getFullYear() - b.getFullYear();
+        if (today.getMonth() < b.getMonth() || (today.getMonth() === b.getMonth() && today.getDate() < b.getDate())) age--;
+        return age >= 0 ? age : '-';
+      },
+
+      modal: {
+        open(id) { document.getElementById(id).style.display = 'flex'; },
+        close(id) { document.getElementById(id).style.display = 'none'; },
+
+        openCreateTrip() {
+          document.getElementById("modalTripTitle").textContent = "Create Tour";
+          document.getElementById("formTripId").value = "";
+          document.getElementById("tripFormName").value = "";
+          document.getElementById("tripFormType").value = "Local";
+          document.getElementById("tripFormDate").value = "";
+          document.getElementById("tripFormAmount").value = "";
+          document.getElementById("tripFormSeats").value = "20";
+          document.getElementById("tripFormNotes").value = "";
+          app.modal.open("modalTrip");
+        },
+
+        openEditTrip(tripId) {
+          const trip = app.trips.find(t => t.id === tripId);
+          if (!trip) return;
+          document.getElementById("modalTripTitle").textContent = "Edit Tour Details";
+          document.getElementById("formTripId").value = trip.id;
+          document.getElementById("tripFormName").value = trip.name || "";
+          document.getElementById("tripFormType").value = trip.type || "Local";
+          document.getElementById("tripFormDate").value = trip.date || "";
+          document.getElementById("tripFormAmount").value = trip.amount || "";
+          document.getElementById("tripFormSeats").value = trip.totalSeats || "";
+          document.getElementById("tripFormNotes").value = trip.notes || "";
+          app.modal.open("modalTrip");
+        },
+
+        openAddPassenger() {
+          const trip = app.trips.find(t => t.id === app.activeTripId);
+          if (!trip) return;
+          document.getElementById("modalPaxTitle").textContent = "Add Passenger";
+          document.getElementById("formPaxTripId").value = trip.id;
+          document.getElementById("formPaxIndex").value = "-1";
+          document.getElementById("paxFormSeat").value = "";
+          document.getElementById("paxFormName").value = "";
+          document.getElementById("paxFormPhone").value = "";
+          document.getElementById("paxFormDob").value = "";
+          document.getElementById("paxFormAge").value = "";
+          document.getElementById("paxFormAadhaar").value = "";
+          document.getElementById("paxFormPassport").value = "";
+          document.getElementById("paxFormPayment").value = "";
+
+          const isLocal = (trip.type || 'Local') === 'Local';
+          document.getElementById("paxNonLocalFields").style.display = isLocal ? 'none' : 'block';
+          document.getElementById("fieldAadhaarWrap").style.display = trip.type === 'Train/Flight' ? 'block' : 'none';
+          document.getElementById("fieldPassportWrap").style.display = trip.type === 'International' ? 'block' : 'none';
+
+          app.modal.open("modalPassenger");
+        },
+
+        openEditPassenger(tripId, index) {
+          const trip = app.trips.find(t => t.id === tripId);
+          if (!trip || !trip.members || !trip.members[index]) return;
+          const m = trip.members[index];
+
+          document.getElementById("modalPaxTitle").textContent = "Edit Passenger";
+          document.getElementById("formPaxTripId").value = trip.id;
+          document.getElementById("formPaxIndex").value = index;
+          document.getElementById("paxFormSeat").value = m.seat || "";
+          document.getElementById("paxFormName").value = m.name || "";
+          document.getElementById("paxFormPhone").value = m.phone || "";
+          document.getElementById("paxFormDob").value = m.dob || "";
+          document.getElementById("paxFormAge").value = m.dob ? app.calculateAge(m.dob) : "";
+          document.getElementById("paxFormAadhaar").value = m.aadhaar || "";
+          document.getElementById("paxFormPassport").value = m.passport || "";
+          document.getElementById("paxFormPayment").value = (trip.type === 'Local' ? m.amountPaid : m.advance) || "";
+
+          const isLocal = (trip.type || 'Local') === 'Local';
+          document.getElementById("paxNonLocalFields").style.display = isLocal ? 'none' : 'block';
+          document.getElementById("fieldAadhaarWrap").style.display = trip.type === 'Train/Flight' ? 'block' : 'none';
+          document.getElementById("fieldPassportWrap").style.display = trip.type === 'International' ? 'block' : 'none';
+
+          app.modal.open("modalPassenger");
+        }
+      },
+
+      toast(msg) {
+        const root = document.getElementById("toastRoot");
+        const el = document.createElement("div");
+        el.className = "toast";
+        el.textContent = msg;
+        root.appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+      }
+    };
+
+    window.addEventListener("DOMContentLoaded", () => app.init());
+  </script>
+</body>
+</html>
