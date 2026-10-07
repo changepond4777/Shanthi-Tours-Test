@@ -4,98 +4,899 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Shanthi Tours — Tour Operations Management</title>
-
-  <!-- Google Material Fonts & Icons -->
+  
+  <!-- Inter Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <!-- React 18, ReactDOM & Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Material UI (MUI v5 Core) -->
-  <script src="https://unpkg.com/@mui/material@5.15.14/umd/material-ui.production.min.js" crossorigin></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-subtle: #eff6ff;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-focus: #3b82f6;
+      
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+
+      --sidebar-w: 240px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #090d16;
+        --surface: #131c2e;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #223049;
+        --border-focus: #3b82f6;
+        --primary-subtle: #1e293b;
+        --success-bg: #052e16;
+        --success-border: #14532d;
+        --warning-bg: #451a03;
+        --warning-border: #78350f;
+        --danger-bg: #450a0a;
+        --danger-border: #7f1d1d;
+      }
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #f8fafc;
-      color: #0f172a;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
       min-height: 100vh;
+      line-height: 1.5;
     }
 
-    /* Fix Issue #1: Dropdown arrow spacing away from the border */
-    .MuiSelect-icon {
-      right: 12px !important;
-    }
-    .MuiOutlinedInput-root .MuiSelect-select {
-      padding-right: 36px !important;
-    }
-
-    /* Fix Issue #3: Red asterisk styling */
-    .required-star {
-      color: #d32f2f;
+    /* Requirement 3: Red Asterisk for Mandatory Fields */
+    .req-star {
+      color: #dc2626 !important;
       font-weight: 700;
       margin-left: 2px;
     }
 
+    /* Sidebar Navigation (Desktop) */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 40;
+    }
+    .sidebar-header {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .sidebar-nav {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover {
+      background: var(--primary-subtle);
+      color: var(--text);
+    }
+    .nav-link.active {
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* App Main Layout */
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding-bottom: 80px;
+    }
+    .app-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .connection-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+    }
+    .conn-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .content-container {
+      padding: 24px;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Mobile Bottom Navigation */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    .mobile-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 100%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .mobile-nav-item.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 40px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-sm { height: 32px; padding: 0 10px; font-size: 12px; border-radius: var(--radius-sm); }
+    .btn-wa { background: #25d366; color: #fff; }
+
+    /* Requirement 2: Clean aligned Back button styling */
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      padding: 6px 12px;
+    }
+    .btn-back svg {
+      flex-shrink: 0;
+      display: block;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border: 1px solid transparent;
+    }
+    .badge-local { background: #f3e8ff; color: #7c3aed; border-color: #e9d5ff; }
+    .badge-train { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+    .badge-intl  { background: #d1fae5; color: #059669; border-color: #a7f3d0; }
+    .badge-avail { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
+    .badge-nearly { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-border); }
+    .badge-full  { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
+    .badge-neutral { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
+
+    /* Inputs & Selects */
+    .field-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block; }
+    .field-input, .field-select, .field-textarea {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    /* Requirement 1: Dropdown arrow padding and margin fix */
+    .field-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding-right: 38px !important;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 15px;
+      cursor: pointer;
+    }
+
+    .field-input:focus, .field-select:focus, .field-textarea:focus {
+      border-color: var(--border-focus);
+    }
+    .field-textarea { height: 75px; padding: 8px 12px; resize: vertical; }
+
+    /* FILTERS TOOLBAR */
+    .filters-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-input-wrap {
+      flex: 2;
+      min-width: 260px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-icon-svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-input-wrap .field-input {
+      padding-left: 36px;
+      width: 100%;
+    }
+    .filters-bar .field-select {
+      flex: 1;
+      min-width: 150px;
+      width: auto;
+    }
+
+    /* Trips Grid */
+    .trips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+    .trip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    }
+    .trip-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .trip-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .trip-card-title { font-size: 16px; font-weight: 700; }
+    .trip-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .trip-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .trip-card-meta strong { color: var(--text); }
+
+    /* Capacity Progress Bar */
+    .capacity-track {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    .capacity-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    .capacity-fill.full { background: var(--danger); }
+    .capacity-fill.nearly { background: var(--warning); }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: var(--bg);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Modal / Sheets */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+      padding: 16px;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-modal);
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 2;
+    }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--surface);
+      position: sticky;
+      bottom: 0;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
     @media print {
-      .no-print { display: none !important; }
-      body { background: #fff !important; }
+      .sidebar, .app-topbar, .mobile-bottom-nav, .filters-bar, .btn, .no-print { display: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+      .content-container { padding: 0 !important; max-width: 100% !important; }
+      .card { border: none !important; box-shadow: none !important; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .mobile-bottom-nav { display: flex; }
+      .content-container { padding: 14px; }
+      .trips-grid { grid-template-columns: 1fr; }
+      .modal-backdrop { align-items: flex-end; padding: 0; }
+      .modal-box { border-radius: var(--radius-xl) var(--radius-xl) 0 0; max-height: 85vh; }
     }
   </style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const {
-      ThemeProvider, createTheme, CssBaseline, Box, Container, Typography,
-      AppBar, Toolbar, Button, IconButton, TextField, InputAdornment, Select,
-      MenuItem, FormControl, InputLabel, Card, CardContent, CardActions,
-      Chip, Grid, LinearProgress, Table, TableHead, TableRow, TableCell,
-      TableBody, TableContainer, Paper, Dialog, DialogTitle, DialogContent,
-      DialogActions, Snackbar, Alert, BottomNavigation, BottomNavigationAction,
-      Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider,
-      useMediaQuery
-    } = MaterialUI;
+  <!-- Desktop Sidebar -->
+  <aside class="sidebar no-print">
+    <div class="sidebar-header">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary);"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span class="sidebar-title">Shanthi Tours</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-link active" onclick="app.navigate('trips')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+        <span>Trips</span>
+      </button>
+      <button class="nav-link" onclick="app.navigate('passengers')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Passengers</span>
+      </button>
+      <button class="nav-link" onclick="app.navigate('reports')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Reports & Dues</span>
+      </button>
+    </nav>
+  </aside>
 
-    // Helper component for red mandatory asterisks
-    const Req = () => <span className="required-star">*</span>;
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottom-nav no-print">
+    <button id="mNavTrips" class="mobile-nav-item active" onclick="app.navigate('trips')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
+      <span>Trips</span>
+    </button>
+    <button id="mNavPassengers" class="mobile-nav-item" onclick="app.navigate('passengers')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <span>Passengers</span>
+    </button>
+    <button id="mNavReports" class="mobile-nav-item" onclick="app.navigate('reports')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/></svg>
+      <span>Reports</span>
+    </button>
+  </nav>
 
-    const theme = createTheme({
-      palette: {
-        primary: { main: '#1976d2', dark: '#115293', light: '#e3f2fd' },
-        secondary: { main: '#7c3aed', light: '#f3e8ff' },
-        success: { main: '#2e7d32', light: '#edf7ed' },
-        warning: { main: '#ed6c02', light: '#fff4e5' },
-        error: { main: '#d32f2f', light: '#fdeded' },
-        background: { default: '#f8fafc', paper: '#ffffff' }
-      },
-      typography: {
-        fontFamily: "'Roboto', sans-serif",
-        h6: { fontWeight: 700 },
-        subtitle1: { fontWeight: 600 }
-      },
-      shape: { borderRadius: 8 },
-      components: {
-        MuiSelect: {
-          styleOverrides: {
-            icon: {
-              right: 12
-            }
-          }
-        }
-      }
-    });
+  <!-- Main Work Area -->
+  <div class="app-main">
+    <header class="app-topbar no-print">
+      <div class="topbar-left">
+        <h1 class="topbar-title" id="pageHeaderTitle">Trips Overview</h1>
+      </div>
+      <div class="connection-badge">
+        <div class="conn-dot"></div>
+        <span>Connected</span>
+      </div>
+    </header>
+
+    <main class="content-container">
+
+      <!-- ================= VIEW: TRIPS ================= -->
+      <section id="viewTrips">
+        <div class="card-header-row">
+          <div style="font-size:13px; color:var(--text-muted);">Operationally manage upcoming & completed tours</div>
+          <button class="btn btn-primary" onclick="app.modal.openCreateTrip()">
+            <span>+ Create Trip</span>
+          </button>
+        </div>
+
+        <!-- Clean Toolbar & Search Row -->
+        <div class="filters-bar">
+          <div class="search-input-wrap">
+            <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="tripSearch" class="field-input" placeholder="Search trips by destination or name..." oninput="app.renderTrips()" />
+          </div>
+          <select id="filterType" class="field-select" onchange="app.renderTrips()">
+            <option value="ALL">All Categories</option>
+            <option value="Local">Local</option>
+            <option value="Train/Flight">Train/Flight</option>
+            <option value="International">International</option>
+          </select>
+          <select id="filterCapacity" class="field-select" onchange="app.renderTrips()">
+            <option value="ALL">All Capacities</option>
+            <option value="AVAILABLE">Available</option>
+            <option value="NEARLY_FULL">Nearly Full (≥80%)</option>
+            <option value="FULL">Full (100%)</option>
+          </select>
+          <select id="filterSort" class="field-select" onchange="app.renderTrips()">
+            <option value="DEPARTURE_NEAR">Departure (Nearest First)</option>
+            <option value="NEWEST">Recently Added</option>
+            <option value="PRICE_DESC">Price (High to Low)</option>
+          </select>
+        </div>
+
+        <!-- Trips 2-Card Grid -->
+        <div id="tripsGridContainer" class="trips-grid">
+          <div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">Loading tour data...</div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: TRIP DETAIL ================= -->
+      <section id="viewTripDetail" style="display:none;">
+        <!-- Requirement 2: Correctly aligned "Back to Trips" CTA button and icon -->
+        <div class="no-print" style="margin-bottom: 16px;">
+          <button class="btn btn-secondary btn-sm btn-back" onclick="app.navigate('trips')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Trips</span>
+          </button>
+        </div>
+
+        <div id="tripDetailHeaderCard" class="card"></div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <div>
+              <h3 class="card-title">Passenger Manifest & Roster</h3>
+              <div id="detailPaxCountSub" style="font-size:12px; color:var(--text-muted);">0 Booked</div>
+            </div>
+            <div class="no-print" style="display:flex; gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="app.exportPassengersCSV()">Export CSV</button>
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">Print Manifest</button>
+              <button class="btn btn-primary btn-sm" onclick="app.modal.openAddPassenger()">+ Add Passenger</button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Seat</th>
+                  <th>Passenger</th>
+                  <th>Phone</th>
+                  <th>Gender / Age</th>
+                  <th>ID Verification</th>
+                  <th>Payment Status</th>
+                  <th class="no-print" style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="detailPaxTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: PASSENGERS ================= -->
+      <section id="viewPassengers" style="display:none;">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Customer Directory & Travel History</h2>
+            <div style="font-size:12px; color:var(--text-muted);">Consolidated passenger records across all scheduled tours</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th style="text-align:center;">Trips Count</th>
+                <th>Tour History</th>
+                <th>Total Revenue Generated</th>
+              </tr>
+            </thead>
+            <tbody id="globalPaxTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: REPORTS ================= -->
+      <section id="viewReports" style="display:none;">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Financial & Outstanding Dues Report</h2>
+            <div style="font-size:12px; color:var(--text-muted);">Accounts receivable and collection reminders</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:18px;">
+          <div class="card" style="margin-bottom:0;">
+            <span class="field-label">Total Expected</span>
+            <div id="kpiExpected" style="font-size:22px; font-weight:800; margin-top:4px;">₹0</div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <span class="field-label">Collected</span>
+            <div id="kpiCollected" style="font-size:22px; font-weight:800; color:var(--success); margin-top:4px;">₹0</div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <span class="field-label">Outstanding Dues</span>
+            <div id="kpiDues" style="font-size:22px; font-weight:800; color:var(--danger); margin-top:4px;">₹0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h3 class="card-title" style="color:var(--danger);">Outstanding Balances (Sorted by Highest Due)</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Passenger</th>
+                  <th>Contact</th>
+                  <th>Tour</th>
+                  <th>Departure</th>
+                  <th>Balance Due (₹)</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="reportsDuesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal: Create / Edit Trip -->
+  <div id="modalTrip" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTripTitle" class="card-title">Create Tour</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.modal.close('modalTrip')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formTripId" />
+        <div style="margin-bottom:12px;">
+          <!-- Requirement 3: Red asterisk -->
+          <label class="field-label">Tour Title <span class="req-star">*</span></label>
+          <input type="text" id="tripFormName" class="field-input" placeholder="e.g. Kashmir Autumn Tour" />
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <!-- Requirement 3: Red asterisk -->
+            <label class="field-label">Tour Category <span class="req-star">*</span></label>
+            <select id="tripFormType" class="field-select">
+              <option value="Local">Local</option>
+              <option value="Train/Flight">Train/Flight</option>
+              <option value="International">International</option>
+            </select>
+          </div>
+          <div>
+            <!-- Requirement 3: Red asterisk -->
+            <label class="field-label">Departure Date <span class="req-star">*</span></label>
+            <input type="date" id="tripFormDate" class="field-input" />
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <label class="field-label">Package Cost Per Person (₹)</label>
+            <input type="number" id="tripFormAmount" class="field-input" placeholder="15000" />
+          </div>
+          <div>
+            <!-- Requirement 3: Red asterisk -->
+            <label class="field-label">Total Seats <span class="req-star">*</span></label>
+            <input type="number" id="tripFormSeats" class="field-input" placeholder="20" />
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Operational Notes</label>
+          <textarea id="tripFormNotes" class="field-textarea" placeholder="Pickup location, guidelines..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="app.modal.close('modalTrip')">Cancel</button>
+        <button class="btn btn-primary" onclick="app.saveTrip()">Save Tour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Passenger -->
+  <div id="modalPassenger" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalPaxTitle" class="card-title">Add Passenger</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.modal.close('modalPassenger')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formPaxTripId" />
+        <input type="hidden" id="formPaxIndex" value="-1" />
+        <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <!-- Requirement 3: Red asterisk -->
+            <label class="field-label">Seat # <span class="req-star">*</span></label>
+            <input type="text" id="paxFormSeat" class="field-input" placeholder="12A" />
+          </div>
+          <div>
+            <!-- Requirement 3: Red asterisk -->
+            <label class="field-label">Full Name <span class="req-star">*</span></label>
+            <input type="text" id="paxFormName" class="field-input" placeholder="Passenger Name" />
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <!-- Requirement 3: Red asterisk -->
+            <label class="field-label">Phone Number <span class="req-star">*</span></label>
+            <input type="tel" id="paxFormPhone" class="field-input" placeholder="10 Digits" />
+          </div>
+          <div>
+            <label class="field-label">Gender</label>
+            <select id="paxFormGender" class="field-select">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="paxNonLocalFields" style="display:none;">
+          <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label class="field-label">Date of Birth</label>
+              <input type="date" id="paxFormDob" class="field-input" />
+            </div>
+            <div>
+              <label class="field-label">Live Age</label>
+              <input type="text" id="paxFormAge" class="field-input" readonly style="background:var(--bg);" placeholder="-" />
+            </div>
+          </div>
+          <div id="fieldAadhaarWrap" style="display:none; margin-bottom:12px;">
+            <label class="field-label">Aadhaar Number</label>
+            <input type="text" id="paxFormAadhaar" class="field-input" placeholder="12-digit Aadhaar ID" />
+          </div>
+          <div id="fieldPassportWrap" style="display:none; margin-bottom:12px;">
+            <label class="field-label">Passport Number</label>
+            <input type="text" id="paxFormPassport" class="field-input" placeholder="Passport No" />
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" id="paxPaymentLabel">Amount Paid (₹)</label>
+          <input type="number" id="paxFormPayment" class="field-input" placeholder="0" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="app.modal.close('modalPassenger')">Cancel</button>
+        <button class="btn btn-primary" onclick="app.savePassenger()">Save Passenger</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Root -->
+  <div id="toastRoot" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script>
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
     const firebaseConfig = {
       apiKey: "AIzaSyCsbSo8KC_Gqwoyy236Hjq266idEOeUOfs",
@@ -107,820 +908,543 @@
       measurementId: "G-63NBK0K5S9"
     };
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const computeAge = (dobStr) => {
-      if (!dobStr) return '-';
-      const bDate = new Date(dobStr);
-      if (isNaN(bDate.getTime())) return '-';
-      const today = new Date();
-      let age = today.getFullYear() - bDate.getFullYear();
-      const m = today.getMonth() - bDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) age--;
-      return age >= 0 ? age : '-';
-    };
+    const app = {
+      trips: [],
+      activeTripId: null,
+      currentView: 'trips',
 
-    function App() {
-      const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-      const [view, setView] = React.useState('trips');
-      const [trips, setTrips] = React.useState([]);
-      const [activeTripId, setActiveTripId] = React.useState(null);
-
-      // Filters
-      const [searchQuery, setSearchQuery] = React.useState('');
-      const [categoryFilter, setCategoryFilter] = React.useState('ALL');
-      const [capacityFilter, setCapacityFilter] = React.useState('ALL');
-      const [sortFilter, setSortFilter] = React.useState('DEPARTURE_NEAR');
-
-      // Modals
-      const [tripDialogOpen, setTripDialogOpen] = React.useState(false);
-      const [editTripId, setEditTripId] = React.useState(null);
-      const [tripForm, setTripForm] = React.useState({ name: '', type: 'Local', date: '', amount: '', totalSeats: '20', notes: '' });
-
-      const [paxDialogOpen, setPaxDialogOpen] = React.useState(false);
-      const [editPaxIndex, setEditPaxIndex] = React.useState(-1);
-      const [paxForm, setPaxForm] = React.useState({ seat: '', name: '', phone: '', gender: 'Male', dob: '', aadhaar: '', passport: '', payment: '' });
-
-      const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'info' });
-
-      React.useEffect(() => {
-        const unsubscribe = db.collection('trips').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
-          const list = [];
-          snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
-          setTrips(list);
+      init() {
+        this.listenToTrips();
+        document.getElementById("paxFormDob").addEventListener("change", (e) => {
+          document.getElementById("paxFormAge").value = app.calculateAge(e.target.value);
         });
-        return () => unsubscribe();
-      }, []);
+      },
 
-      const showToast = (message, severity = 'info') => {
-        setSnackbar({ open: true, message, severity });
-      };
-
-      const activeTrip = trips.find(t => t.id === activeTripId);
-
-      const filteredTrips = trips.filter(t => {
-        const nameMatch = !searchQuery || (t.name || '').toLowerCase().includes(searchQuery.toLowerCase());
-        const typeMatch = categoryFilter === 'ALL' || (t.type || 'Local') === categoryFilter;
-        const totalSeats = parseInt(t.totalSeats, 10) || 0;
-        const filled = (t.members || []).length;
-        const ratio = totalSeats > 0 ? filled / totalSeats : 0;
-
-        let capMatch = true;
-        if (capacityFilter === 'AVAILABLE') capMatch = ratio < 0.8;
-        else if (capacityFilter === 'NEARLY_FULL') capMatch = ratio >= 0.8 && ratio < 1;
-        else if (capacityFilter === 'FULL') capMatch = ratio >= 1;
-
-        return nameMatch && typeMatch && capMatch;
-      }).sort((a, b) => {
-        if (sortFilter === 'DEPARTURE_NEAR') return (a.date || '9999').localeCompare(b.date || '9999');
-        if (sortFilter === 'PRICE_DESC') return (b.amount || 0) - (a.amount || 0);
-        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
-      });
-
-      const handleOpenCreateTrip = () => {
-        setEditTripId(null);
-        setTripForm({ name: '', type: 'Local', date: '', amount: '', totalSeats: '20', notes: '' });
-        setTripDialogOpen(true);
-      };
-
-      const handleOpenEditTrip = (t) => {
-        setEditTripId(t.id);
-        setTripForm({
-          name: t.name || '',
-          type: t.type || 'Local',
-          date: t.date || '',
-          amount: t.amount || '',
-          totalSeats: t.totalSeats || '',
-          notes: t.notes || ''
+      listenToTrips() {
+        db.collection("trips").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+          app.trips = [];
+          snapshot.forEach(doc => {
+            app.trips.push({ id: doc.id, ...doc.data() });
+          });
+          app.renderActiveView();
         });
-        setTripDialogOpen(true);
-      };
+      },
 
-      const handleSaveTrip = () => {
-        if (!tripForm.name.trim() || !tripForm.date) {
-          return showToast('Trip name and departure date are required.', 'error');
+      navigate(viewId) {
+        app.currentView = viewId;
+        ['viewTrips', 'viewTripDetail', 'viewPassengers', 'viewReports'].forEach(v => {
+          document.getElementById(v).style.display = 'none';
+        });
+
+        document.querySelectorAll('.sidebar .nav-link').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mobile-bottom-nav .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
+
+        const titleMap = {
+          'trips': 'Trips Overview',
+          'tripDetail': 'Tour Workspace',
+          'passengers': 'Customer Directory',
+          'reports': 'Financial & Operations Reports'
+        };
+        document.getElementById("pageHeaderTitle").textContent = titleMap[viewId] || 'Shanthi Tours';
+
+        if (viewId === 'trips') {
+          document.getElementById('viewTrips').style.display = 'block';
+          app.renderTrips();
+        } else if (viewId === 'tripDetail') {
+          document.getElementById('viewTripDetail').style.display = 'block';
+          app.renderTripDetail();
+        } else if (viewId === 'passengers') {
+          document.getElementById('viewPassengers').style.display = 'block';
+          app.renderGlobalPassengers();
+        } else if (viewId === 'reports') {
+          document.getElementById('viewReports').style.display = 'block';
+          app.renderReports();
+        }
+      },
+
+      renderActiveView() {
+        if (app.currentView === 'trips') app.renderTrips();
+        else if (app.currentView === 'tripDetail') app.renderTripDetail();
+        else if (app.currentView === 'passengers') app.renderGlobalPassengers();
+        else if (app.currentView === 'reports') app.renderReports();
+      },
+
+      renderTrips() {
+        const container = document.getElementById("tripsGridContainer");
+        const search = (document.getElementById("tripSearch").value || "").toLowerCase().trim();
+        const filterType = document.getElementById("filterType").value;
+        const filterCap = document.getElementById("filterCapacity").value;
+        const filterSort = document.getElementById("filterSort").value;
+
+        let filtered = app.trips.filter(t => {
+          const nameMatch = !search || (t.name || '').toLowerCase().includes(search);
+          const typeMatch = filterType === 'ALL' || (t.type || 'Local') === filterType;
+          const totalSeats = parseInt(t.totalSeats, 10) || 0;
+          const filled = (t.members || []).length;
+          const ratio = totalSeats > 0 ? filled / totalSeats : 0;
+
+          let capMatch = true;
+          if (filterCap === 'AVAILABLE') capMatch = ratio < 0.8;
+          else if (filterCap === 'NEARLY_FULL') capMatch = ratio >= 0.8 && ratio < 1;
+          else if (filterCap === 'FULL') capMatch = ratio >= 1;
+
+          return nameMatch && typeMatch && capMatch;
+        });
+
+        filtered.sort((a, b) => {
+          if (filterSort === 'DEPARTURE_NEAR') return (a.date || '9999').localeCompare(b.date || '9999');
+          if (filterSort === 'NEWEST') return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+          if (filterSort === 'PRICE_DESC') return (b.amount || 0) - (a.amount || 0);
+          return 0;
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<div class="card" style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">No tours found.</div>`;
+          return;
         }
 
+        container.innerHTML = filtered.map(t => {
+          const type = t.type || 'Local';
+          const totalSeats = parseInt(t.totalSeats, 10) || 0;
+          const members = t.members || [];
+          const filled = members.length;
+          const capPct = totalSeats > 0 ? Math.min(100, Math.round((filled / totalSeats) * 100)) : 0;
+          const price = parseFloat(t.amount) || 0;
+
+          let badgeCatClass = 'badge-local';
+          if (type === 'Train/Flight') badgeCatClass = 'badge-train';
+          if (type === 'International') badgeCatClass = 'badge-intl';
+
+          let capBadge = 'badge-avail';
+          let fillClass = '';
+          if (capPct >= 100) { capBadge = 'badge-full'; fillClass = 'full'; }
+          else if (capPct >= 80) { capBadge = 'badge-nearly'; fillClass = 'nearly'; }
+
+          return `
+            <div class="trip-card" onclick="app.openTripDetail('${t.id}')">
+              <div>
+                <div class="trip-card-top">
+                  <h3 class="trip-card-title">${escapeHtml(t.name)}</h3>
+                  <span class="badge ${badgeCatClass}">${escapeHtml(type)}</span>
+                </div>
+                <div class="trip-card-badges">
+                  <span class="badge ${capBadge}">${totalSeats > 0 ? `${filled}/${totalSeats} Seats` : `${filled} Booked`}</span>
+                  <span class="badge badge-neutral">${t.date ? t.date : 'Date TBD'}</span>
+                </div>
+                <div class="trip-card-meta">
+                  <div>Departure: <strong>${t.date || 'TBD'}</strong></div>
+                  <div>Cost: <strong>₹${price.toLocaleString('en-IN')}</strong></div>
+                </div>
+              </div>
+
+              <div>
+                ${totalSeats > 0 ? `
+                  <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px; font-weight:600; color:var(--text-muted);">
+                    <span>Capacity</span>
+                    <span>${capPct}%</span>
+                  </div>
+                  <div class="capacity-track">
+                    <div class="capacity-fill ${fillClass}" style="width:${capPct}%;"></div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      openTripDetail(tripId) {
+        app.activeTripId = tripId;
+        app.navigate('tripDetail');
+      },
+
+      renderTripDetail() {
+        const trip = app.trips.find(t => t.id === app.activeTripId);
+        if (!trip) return app.navigate('trips');
+
+        const members = trip.members || [];
+        const tripPrice = parseFloat(trip.amount) || 0;
+        const totalSeats = parseInt(trip.totalSeats, 10) || 0;
+        const filled = members.length;
+        const expectedTotal = filled * tripPrice;
+
+        let totalCollected = 0;
+        members.forEach(m => {
+          totalCollected += (trip.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0));
+        });
+        const outstanding = Math.max(0, expectedTotal - totalCollected);
+
+        document.getElementById("tripDetailHeaderCard").innerHTML = `
+          <div class="card-header-row">
+            <div>
+              <h2 style="font-size:20px; font-weight:800;">${escapeHtml(trip.name)}</h2>
+              <div style="font-size:12px; color:var(--text-muted);">
+                ${escapeHtml(trip.type || 'Local')} • Departure: ${trip.date || 'TBD'}
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="app.modal.openEditTrip('${trip.id}')">Edit Tour</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.duplicateTrip('${trip.id}')">Duplicate</button>
+              <button class="btn btn-danger btn-sm" onclick="app.deleteTrip('${trip.id}', '${escapeHtml(trip.name)}')">Delete</button>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; padding:12px 0; border-top:1px solid var(--border);">
+            <div><span class="field-label">Booked</span><strong>${filled} / ${totalSeats || '∞'} Seats</strong></div>
+            <div><span class="field-label">Collected</span><strong style="color:var(--success);">₹${totalCollected.toLocaleString('en-IN')}</strong></div>
+            <div><span class="field-label">Outstanding</span><strong style="color:var(--danger);">₹${outstanding.toLocaleString('en-IN')}</strong></div>
+          </div>
+        `;
+
+        document.getElementById("detailPaxCountSub").textContent = `${members.length} Confirmed Passengers`;
+        const tbody = document.getElementById("detailPaxTableBody");
+
+        if (members.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">No passengers added yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = members.map((m, index) => {
+          const paid = trip.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
+          const balance = Math.max(0, tripPrice - paid);
+          const isFullyPaid = balance === 0;
+
+          const cleanPhone = (m.phone || '').replace(/[^0-9]/g, '');
+          const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+          const waMsg = encodeURIComponent(`Hi ${m.name}, outstanding balance for "${trip.name}": ₹${balance}. Thank you!`);
+
+          return `
+            <tr>
+              <td><strong>#${escapeHtml(m.seat || '-')}</strong></td>
+              <td><strong>${escapeHtml(m.name || 'Unnamed')}</strong></td>
+              <td>${escapeHtml(m.phone || '-')}</td>
+              <td>${escapeHtml(m.gender || '-')} / ${m.dob ? app.calculateAge(m.dob) : '-'}</td>
+              <td><span class="badge badge-neutral">${trip.type === 'Train/Flight' ? (m.aadhaar ? '[Aadhaar Redacted]' : 'No ID') : (trip.type === 'International' ? (m.passport || 'No Passport') : 'Verified')}</span></td>
+              <td>
+                <span class="badge ${isFullyPaid ? 'badge-avail' : 'badge-nearly'}">
+                  ${isFullyPaid ? 'Paid' : `Due ₹${balance.toLocaleString('en-IN')}`}
+                </span>
+              </td>
+              <td class="no-print" style="text-align:right;">
+                ${cleanPhone ? `<a href="https://wa.me/${waPhone}?text=${waMsg}" target="_blank" class="btn btn-wa btn-sm">WA</a>` : ''}
+                <button class="btn btn-secondary btn-sm" onclick="app.modal.openEditPassenger('${trip.id}', ${index})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="app.deletePassenger('${trip.id}', ${index})">✕</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      savePassenger() {
+        const tripId = document.getElementById("formPaxTripId").value;
+        const editIdx = parseInt(document.getElementById("formPaxIndex").value, 10);
+        const name = document.getElementById("paxFormName").value.trim();
+        const seat = document.getElementById("paxFormSeat").value.trim().toUpperCase();
+        const phone = document.getElementById("paxFormPhone").value.trim();
+        const gender = document.getElementById("paxFormGender").value;
+
+        if (!name || !seat) return app.toast("Name and Seat are required");
+
+        const tripRef = db.collection("trips").doc(tripId);
+
+        db.runTransaction(transaction => {
+          return transaction.get(tripRef).then(doc => {
+            if (!doc.exists) return;
+            const data = doc.data();
+            const members = data.members || [];
+
+            let memberObj = { name, seat, phone, gender };
+            if (data.type === 'Local') {
+              memberObj.amountPaid = parseFloat(document.getElementById("paxFormPayment").value) || 0;
+            } else {
+              memberObj.dob = document.getElementById("paxFormDob").value;
+              memberObj.advance = parseFloat(document.getElementById("paxFormPayment").value) || 0;
+              if (data.type === 'Train/Flight') memberObj.aadhaar = document.getElementById("paxFormAadhaar").value.trim();
+              if (data.type === 'International') memberObj.passport = document.getElementById("paxFormPassport").value.trim();
+            }
+
+            if (editIdx >= 0) members[editIdx] = { ...members[editIdx], ...memberObj };
+            else members.push(memberObj);
+
+            transaction.update(tripRef, { members });
+          });
+        }).then(() => {
+          app.modal.close('modalPassenger');
+          app.toast("Passenger record saved");
+        });
+      },
+
+      deletePassenger(tripId, index) {
+        if (!confirm("Remove this passenger?")) return;
+        const tripRef = db.collection("trips").doc(tripId);
+        db.runTransaction(transaction => {
+          return transaction.get(tripRef).then(doc => {
+            const members = doc.data().members || [];
+            members.splice(index, 1);
+            transaction.update(tripRef, { members });
+          });
+        }).then(() => app.toast("Passenger removed"));
+      },
+
+      saveTrip() {
+        const id = document.getElementById("formTripId").value;
+        const name = document.getElementById("tripFormName").value.trim();
+        const type = document.getElementById("tripFormType").value;
+        const date = document.getElementById("tripFormDate").value;
+        const amount = parseFloat(document.getElementById("tripFormAmount").value) || 0;
+        const totalSeats = parseInt(document.getElementById("tripFormSeats").value, 10) || 0;
+        const notes = document.getElementById("tripFormNotes").value.trim();
+
+        if (!name || !date) return app.toast("Tour Title and Date are required");
+
         const payload = {
-          name: tripForm.name.trim(),
-          type: tripForm.type,
-          date: tripForm.date,
-          amount: parseFloat(tripForm.amount) || 0,
-          totalSeats: parseInt(tripForm.totalSeats, 10) || 0,
-          notes: tripForm.notes.trim(),
+          name, type, date, amount, totalSeats, notes,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        if (editTripId) {
-          db.collection('trips').doc(editTripId).update(payload).then(() => {
-            setTripDialogOpen(false);
-            showToast('Trip updated successfully', 'success');
+        if (id) {
+          db.collection("trips").doc(id).update(payload).then(() => {
+            app.modal.close('modalTrip');
+            app.toast("Tour updated");
           });
         } else {
           payload.status = 'Ongoing';
           payload.members = [];
           payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          db.collection('trips').add(payload).then(() => {
-            setTripDialogOpen(false);
-            showToast('New trip created', 'success');
+          db.collection("trips").add(payload).then(() => {
+            app.modal.close('modalTrip');
+            app.toast("Tour created");
           });
         }
-      };
+      },
 
-      const handleDeleteTrip = (tripId, tripName) => {
-        if (!window.confirm(`Are you sure you want to delete "${tripName}"? This cannot be undone.`)) return;
-        db.collection('trips').doc(tripId).delete().then(() => {
-          showToast('Trip removed', 'info');
-          if (activeTripId === tripId) setView('trips');
-        });
-      };
-
-      const handleDuplicateTrip = (t) => {
-        const newTitle = window.prompt('Title for duplicated trip:', `${t.name} (Copy)`);
+      duplicateTrip(tripId) {
+        const source = app.trips.find(t => t.id === tripId);
+        if (!source) return;
+        const newTitle = prompt("Duplicate tour title:", source.name + " (Copy)");
         if (!newTitle) return;
 
-        db.collection('trips').add({
+        db.collection("trips").add({
           name: newTitle.trim(),
-          type: t.type || 'Local',
-          date: t.date || '',
-          amount: t.amount || 0,
-          totalSeats: t.totalSeats || 0,
-          notes: t.notes || '',
+          type: source.type || 'Local',
+          date: source.date || '',
+          amount: source.amount || 0,
+          totalSeats: source.totalSeats || 0,
+          notes: source.notes || '',
           status: 'Ongoing',
           members: [],
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => showToast('Duplicate trip created', 'success'));
-      };
+        }).then(() => app.toast("Duplicated tour created"));
+      },
 
-      const handleOpenAddPax = () => {
-        setEditPaxIndex(-1);
-        setPaxForm({ seat: '', name: '', phone: '', gender: 'Male', dob: '', aadhaar: '', passport: '', payment: '' });
-        setPaxDialogOpen(true);
-      };
-
-      const handleOpenEditPax = (m, index) => {
-        setEditPaxIndex(index);
-        setPaxForm({
-          seat: m.seat || '',
-          name: m.name || '',
-          phone: m.phone || '',
-          gender: m.gender || 'Male',
-          dob: m.dob || '',
-          aadhaar: m.aadhaar || '',
-          passport: m.passport || '',
-          payment: activeTrip.type === 'Local' ? (m.amountPaid || '') : (m.advance || '')
+      deleteTrip(tripId, tripName) {
+        if (!confirm(`Permanently delete "${tripName}"?`)) return;
+        db.collection("trips").doc(tripId).delete().then(() => {
+          app.toast("Tour deleted");
+          app.navigate('trips');
         });
-        setPaxDialogOpen(true);
-      };
+      },
 
-      const handleSavePassenger = () => {
-        if (!paxForm.name.trim() || !paxForm.seat.trim()) {
-          return showToast('Passenger name and seat number are required.', 'error');
+      renderGlobalPassengers() {
+        const tbody = document.getElementById("globalPaxTableBody");
+        let customerMap = {};
+
+        app.trips.forEach(t => {
+          (t.members || []).forEach(m => {
+            const key = (m.phone && m.phone.trim()) ? m.phone.replace(/[^0-9]/g, '') : (m.name || 'Unnamed').toLowerCase().trim();
+            const paid = t.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
+
+            if (!customerMap[key]) {
+              customerMap[key] = { name: m.name || 'Unnamed', phone: m.phone || '-', trips: [], totalPaid: 0 };
+            }
+            if (!customerMap[key].trips.includes(t.name)) customerMap[key].trips.push(t.name);
+            customerMap[key].totalPaid += paid;
+          });
+        });
+
+        const list = Object.values(customerMap);
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No passenger history found.</td></tr>`;
+          return;
         }
 
-        const tripRef = db.collection('trips').doc(activeTripId);
+        tbody.innerHTML = list.map(c => `
+          <tr>
+            <td><strong>${escapeHtml(c.name)}</strong></td>
+            <td>${escapeHtml(c.phone)}</td>
+            <td style="text-align:center;"><span class="badge badge-avail">${c.trips.length} Tours</span></td>
+            <td style="color:var(--text-muted); font-size:12px;">${escapeHtml(c.trips.join(', '))}</td>
+            <td style="font-weight:700; color:var(--success);">₹${c.totalPaid.toLocaleString('en-IN')}</td>
+          </tr>
+        `).join('');
+      },
 
-        db.runTransaction((transaction) => {
-          return transaction.get(tripRef).then((doc) => {
-            if (!doc.exists) return;
-            const data = doc.data();
-            const members = data.members || [];
-            const seatKey = paxForm.seat.trim().toUpperCase();
+      renderReports() {
+        let totalExpected = 0, totalCollected = 0, totalDues = 0, overdueList = [];
 
-            const seatConflict = members.find((m, i) => i !== editPaxIndex && m.seat && m.seat.trim().toUpperCase() === seatKey);
-            if (seatConflict) {
-              throw new Error(`Seat ${seatKey} is already booked by ${seatConflict.name}`);
-            }
+        app.trips.forEach(t => {
+          const members = t.members || [];
+          const price = parseFloat(t.amount) || 0;
+          members.forEach(m => {
+            const paid = t.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
+            const due = Math.max(0, price - paid);
+            totalExpected += price;
+            totalCollected += paid;
+            totalDues += due;
 
-            const paxObj = {
-              seat: seatKey,
-              name: paxForm.name.trim(),
-              phone: paxForm.phone.trim(),
-              gender: paxForm.gender
-            };
-
-            if (data.type === 'Local') {
-              paxObj.amountPaid = parseFloat(paxForm.payment) || 0;
-            } else {
-              paxObj.dob = paxForm.dob;
-              paxObj.advance = parseFloat(paxForm.payment) || 0;
-              if (data.type === 'Train/Flight') paxObj.aadhaar = paxForm.aadhaar.trim();
-              if (data.type === 'International') paxObj.passport = paxForm.passport.trim();
-            }
-
-            if (editPaxIndex >= 0) members[editPaxIndex] = { ...members[editPaxIndex], ...paxObj };
-            else members.push(paxObj);
-
-            transaction.update(tripRef, { members });
+            if (due > 0) overdueList.push({ name: m.name, phone: m.phone, tripName: t.name, tripDate: t.date, due });
           });
-        }).then(() => {
-          setPaxDialogOpen(false);
-          showToast('Passenger saved', 'success');
-        }).catch(err => showToast(err.message, 'error'));
-      };
+        });
 
-      const handleDeletePassenger = (index) => {
-        if (!window.confirm('Remove this passenger from the trip?')) return;
-        const tripRef = db.collection('trips').doc(activeTripId);
-        db.runTransaction((transaction) => {
-          return transaction.get(tripRef).then((doc) => {
-            const members = doc.data().members || [];
-            members.splice(index, 1);
-            transaction.update(tripRef, { members });
-          });
-        }).then(() => showToast('Passenger removed', 'info'));
-      };
+        document.getElementById("kpiExpected").textContent = '₹' + totalExpected.toLocaleString('en-IN');
+        document.getElementById("kpiCollected").textContent = '₹' + totalCollected.toLocaleString('en-IN');
+        document.getElementById("kpiDues").textContent = '₹' + totalDues.toLocaleString('en-IN');
 
-      const handleExportCSV = () => {
-        if (!activeTrip) return;
-        let csv = "Seat,Name,Phone,Gender,Paid,Due Balance\n";
-        const price = parseFloat(activeTrip.amount) || 0;
-        (activeTrip.members || []).forEach(m => {
-          const paid = activeTrip.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
-          const due = Math.max(0, price - paid);
-          csv += `"${m.seat || ''}","${m.name || ''}","${m.phone || ''}","${m.gender || ''}",${paid},${due}\n`;
+        overdueList.sort((a, b) => b.due - a.due);
+        const tbody = document.getElementById("reportsDuesTableBody");
+
+        if (overdueList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--success);">All balances cleared!</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = overdueList.map(o => {
+          const cleanPhone = (o.phone || '').replace(/[^0-9]/g, '');
+          const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+          const msg = encodeURIComponent(`Hello ${o.name}, friendly reminder from Shanthi Tours for "${o.tripName}". Outstanding due: ₹${o.due}.`);
+
+          return `
+            <tr>
+              <td><strong>${escapeHtml(o.name)}</strong></td>
+              <td>${escapeHtml(o.phone || '-')}</td>
+              <td>${escapeHtml(o.tripName)}</td>
+              <td>${escapeHtml(o.tripDate || 'TBD')}</td>
+              <td style="color:var(--danger); font-weight:700;">₹${o.due.toLocaleString('en-IN')}</td>
+              <td style="text-align:right;">
+                ${cleanPhone ? `<a href="https://wa.me/${waPhone}?text=${msg}" target="_blank" class="btn btn-wa btn-sm">💬 Remind</a>` : '-'}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      exportPassengersCSV() {
+        const trip = app.trips.find(t => t.id === app.activeTripId);
+        if (!trip) return;
+        let csv = "Seat,Name,Phone,Gender,Amount Paid\n";
+        (trip.members || []).forEach(m => {
+          const paid = trip.type === 'Local' ? (m.amountPaid || 0) : (m.advance || 0);
+          csv += `"${m.seat || ''}","${m.name || ''}","${m.phone || ''}","${m.gender || ''}",${paid}\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `${activeTrip.name}_Manifest.csv`;
+        a.download = `${trip.name}_manifest.csv`;
         a.click();
-      };
+      },
 
-      return (
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Box sx={{ display: 'flex', minHeight: '100vh', pb: isMobile ? 8 : 0 }}>
-            {/* Desktop Left Drawer Navigation */}
-            {!isMobile && (
-              <Drawer
-                variant="permanent"
-                className="no-print"
-                sx={{
-                  width: 240,
-                  flexShrink: 0,
-                  [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box', borderRight: '1px solid #e2e8f0' },
-                }}
-              >
-                <Toolbar>
-                  <Typography variant="h6" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span className="material-icons">explore</span> Shanthi Tours
-                  </Typography>
-                </Toolbar>
-                <Divider />
-                <List sx={{ px: 1, pt: 1 }}>
-                  <ListItem disablePadding>
-                    <ListItemButton selected={view === 'trips' || view === 'tripDetail'} onClick={() => setView('trips')} sx={{ borderRadius: 1 }}>
-                      <ListItemIcon><span className="material-icons" style={{ color: view === 'trips' ? '#1976d2' : '#64748b' }}>map</span></ListItemIcon>
-                      <ListItemText primary="Trips" primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }} />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem disablePadding>
-                    <ListItemButton selected={view === 'passengers'} onClick={() => setView('passengers')} sx={{ borderRadius: 1 }}>
-                      <ListItemIcon><span className="material-icons" style={{ color: view === 'passengers' ? '#1976d2' : '#64748b' }}>group</span></ListItemIcon>
-                      <ListItemText primary="Passengers" primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }} />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem disablePadding>
-                    <ListItemButton selected={view === 'reports'} onClick={() => setView('reports')} sx={{ borderRadius: 1 }}>
-                      <ListItemIcon><span className="material-icons" style={{ color: view === 'reports' ? '#1976d2' : '#64748b' }}>bar_chart</span></ListItemIcon>
-                      <ListItemText primary="Reports & Dues" primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }} />
-                    </ListItemButton>
-                  </ListItem>
-                </List>
-              </Drawer>
-            )}
+      calculateAge(dobStr) {
+        if (!dobStr) return '-';
+        const b = new Date(dobStr);
+        if (isNaN(b.getTime())) return '-';
+        const today = new Date();
+        let age = today.getFullYear() - b.getFullYear();
+        if (today.getMonth() < b.getMonth() || (today.getMonth() === b.getMonth() && today.getDate() < b.getDate())) age--;
+        return age >= 0 ? age : '-';
+      },
 
-            {/* Main Application Area */}
-            <Box component="main" sx={{ flexGrow: 1, minWidth: 0 }}>
-              <AppBar position="sticky" color="inherit" elevation={1} className="no-print" sx={{ bgcolor: '#fff', borderBottom: '1px solid #e2e8f0' }}>
-                <Toolbar sx={{ justifyContent: 'space-between' }}>
-                  <Typography variant="h6" sx={{ fontSize: 18, color: '#0f172a' }}>
-                    {view === 'trips' && 'Tour Operations'}
-                    {view === 'tripDetail' && 'Tour Workspace'}
-                    {view === 'passengers' && 'Passenger Directory'}
-                    {view === 'reports' && 'Financial Reports & Dues'}
-                  </Typography>
-                  <Chip
-                    icon={<span className="material-icons" style={{ fontSize: 14, color: '#2e7d32' }}>wifi</span>}
-                    label="Cloud Live"
-                    size="small"
-                    color="success"
-                    variant="outlined"
-                  />
-                </Toolbar>
-              </AppBar>
+      modal: {
+        open(id) { document.getElementById(id).style.display = 'flex'; },
+        close(id) { document.getElementById(id).style.display = 'none'; },
 
-              <Container maxWidth="lg" sx={{ py: 3 }}>
-                {/* ===================== VIEW 1: TRIPS (2-CARD GRID) ===================== */}
-                {view === 'trips' && (
-                  <Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Manage bookings, seat allocations, and payment statuses
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<span className="material-icons">add</span>}
-                        onClick={handleOpenCreateTrip}
-                      >
-                        Create New Trip
-                      </Button>
-                    </Box>
+        openCreateTrip() {
+          document.getElementById("modalTripTitle").textContent = "Create Tour";
+          document.getElementById("formTripId").value = "";
+          document.getElementById("tripFormName").value = "";
+          document.getElementById("tripFormType").value = "Local";
+          document.getElementById("tripFormDate").value = "";
+          document.getElementById("tripFormAmount").value = "";
+          document.getElementById("tripFormSeats").value = "20";
+          document.getElementById("tripFormNotes").value = "";
+          app.modal.open("modalTrip");
+        },
 
-                    {/* Filter & Search Bar */}
-                    <Paper elevation={0} sx={{ p: 2, mb: 3, border: '1px solid #e2e8f0', borderRadius: 2 }}>
-                      <Grid container spacing={1.5} alignItems="center">
-                        <Grid item xs={12} sm={4}>
-                          <TextField
-                            fullWidth
-                            size="small"
-                            placeholder="Search by trip name..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <span className="material-icons" style={{ color: '#94a3b8', fontSize: 20 }}>search</span>
-                                </InputAdornment>
-                              )
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={6} sm={2.5}>
-                          <FormControl fullWidth size="small">
-                            <InputLabel id="cat-label">Category</InputLabel>
-                            <Select labelId="cat-label" value={categoryFilter} label="Category" onChange={(e) => setCategoryFilter(e.target.value)}>
-                              <MenuItem value="ALL">All Categories</MenuItem>
-                              <MenuItem value="Local">Local</MenuItem>
-                              <MenuItem value="Train/Flight">Train/Flight</MenuItem>
-                              <MenuItem value="International">International</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={6} sm={2.5}>
-                          <FormControl fullWidth size="small">
-                            <InputLabel id="cap-label">Capacity</InputLabel>
-                            <Select labelId="cap-label" value={capacityFilter} label="Capacity" onChange={(e) => setCapacityFilter(e.target.value)}>
-                              <MenuItem value="ALL">All Capacities</MenuItem>
-                              <MenuItem value="AVAILABLE">Available</MenuItem>
-                              <MenuItem value="NEARLY_FULL">Nearly Full (≥80%)</MenuItem>
-                              <MenuItem value="FULL">Full (100%)</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={3}>
-                          <FormControl fullWidth size="small">
-                            <InputLabel id="sort-label">Sort By</InputLabel>
-                            <Select labelId="sort-label" value={sortFilter} label="Sort By" onChange={(e) => setSortFilter(e.target.value)}>
-                              <MenuItem value="DEPARTURE_NEAR">Nearest Departure</MenuItem>
-                              <MenuItem value="PRICE_DESC">Price (High to Low)</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      </Grid>
-                    </Paper>
+        openEditTrip(tripId) {
+          const trip = app.trips.find(t => t.id === tripId);
+          if (!trip) return;
+          document.getElementById("modalTripTitle").textContent = "Edit Tour Details";
+          document.getElementById("formTripId").value = trip.id;
+          document.getElementById("tripFormName").value = trip.name || "";
+          document.getElementById("tripFormType").value = trip.type || "Local";
+          document.getElementById("tripFormDate").value = trip.date || "";
+          document.getElementById("tripFormAmount").value = trip.amount || "";
+          document.getElementById("tripFormSeats").value = trip.totalSeats || "";
+          document.getElementById("tripFormNotes").value = trip.notes || "";
+          app.modal.open("modalTrip");
+        },
 
-                    {/* 2-Card Per Row Grid */}
-                    <Grid container spacing={2}>
-                      {filteredTrips.map((t) => {
-                        const totalSeats = parseInt(t.totalSeats, 10) || 0;
-                        const filled = (t.members || []).length;
-                        const capPct = totalSeats > 0 ? Math.min(100, Math.round((filled / totalSeats) * 100)) : 0;
-                        const price = parseFloat(t.amount) || 0;
+        openAddPassenger() {
+          const trip = app.trips.find(t => t.id === app.activeTripId);
+          if (!trip) return;
+          document.getElementById("modalPaxTitle").textContent = "Add Passenger";
+          document.getElementById("formPaxTripId").value = trip.id;
+          document.getElementById("formPaxIndex").value = "-1";
+          document.getElementById("paxFormSeat").value = "";
+          document.getElementById("paxFormName").value = "";
+          document.getElementById("paxFormPhone").value = "";
+          document.getElementById("paxFormDob").value = "";
+          document.getElementById("paxFormAge").value = "";
+          document.getElementById("paxFormAadhaar").value = "";
+          document.getElementById("paxFormPassport").value = "";
+          document.getElementById("paxFormPayment").value = "";
 
-                        return (
-                          <Grid item xs={12} sm={6} key={t.id}>
-                            <Card
-                              elevation={0}
-                              sx={{
-                                border: '1px solid #e2e8f0',
-                                borderRadius: 2,
-                                transition: 'all 0.15s ease',
-                                cursor: 'pointer',
-                                '&:hover': { borderColor: 'primary.main', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }
-                              }}
-                              onClick={() => { setActiveTripId(t.id); setView('tripDetail'); }}
-                            >
-                              <CardContent sx={{ pb: 1 }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: 17 }}>
-                                    {t.name}
-                                  </Typography>
-                                  <Chip label={t.status || 'Ongoing'} size="small" color={t.status === 'Full' ? 'error' : 'primary'} variant="outlined" />
-                                </Box>
+          const isLocal = (trip.type || 'Local') === 'Local';
+          document.getElementById("paxNonLocalFields").style.display = isLocal ? 'none' : 'block';
+          document.getElementById("fieldAadhaarWrap").style.display = trip.type === 'Train/Flight' ? 'block' : 'none';
+          document.getElementById("fieldPassportWrap").style.display = trip.type === 'International' ? 'block' : 'none';
 
-                                <Box sx={{ display: 'flex', gap: 0.8, flexWrap: 'wrap', mb: 1.5 }}>
-                                  <Chip label={t.type || 'Local'} size="small" color="secondary" />
-                                  <Chip label={totalSeats > 0 ? `${filled}/${totalSeats} Seats` : `${filled} Booked`} size="small" variant="outlined" />
-                                </Box>
+          app.modal.open("modalPassenger");
+        },
 
-                                <Typography variant="body2" color="text.secondary">
-                                  🗓 Departure: <strong>{t.date || 'TBD'}</strong>
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  💰 Price: <strong>₹{price.toLocaleString('en-IN')}</strong> / person
-                                </Typography>
+        openEditPassenger(tripId, index) {
+          const trip = app.trips.find(t => t.id === tripId);
+          if (!trip || !trip.members || !trip.members[index]) return;
+          const m = trip.members[index];
 
-                                {totalSeats > 0 && (
-                                  <Box sx={{ mt: 1.5 }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 600, mb: 0.5, color: '#64748b' }}>
-                                      <span>Occupancy</span>
-                                      <span>{capPct}%</span>
-                                    </Box>
-                                    <LinearProgress variant="determinate" value={capPct} color={capPct >= 100 ? 'error' : (capPct >= 80 ? 'warning' : 'primary')} sx={{ height: 6, borderRadius: 3 }} />
-                                  </Box>
-                                )}
-                              </CardContent>
-                              <CardActions sx={{ justifyContent: 'space-between', px: 2, pt: 0, pb: 1.5 }}>
-                                <Button size="small" color="primary">Manage Roster →</Button>
-                                <Typography variant="caption" color="text.secondary">Click to open</Typography>
-                              </CardActions>
-                            </Card>
-                          </Grid>
-                        );
-                      })}
-                      {filteredTrips.length === 0 && (
-                        <Grid item xs={12}>
-                          <Paper sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>No trips found matching criteria.</Paper>
-                        </Grid>
-                      )}
-                    </Grid>
-                  </Box>
-                )}
+          document.getElementById("modalPaxTitle").textContent = "Edit Passenger";
+          document.getElementById("formPaxTripId").value = trip.id;
+          document.getElementById("formPaxIndex").value = index;
+          document.getElementById("paxFormSeat").value = m.seat || "";
+          document.getElementById("paxFormName").value = m.name || "";
+          document.getElementById("paxFormPhone").value = m.phone || "";
+          document.getElementById("paxFormDob").value = m.dob || "";
+          document.getElementById("paxFormAge").value = m.dob ? app.calculateAge(m.dob) : "";
+          document.getElementById("paxFormAadhaar").value = m.aadhaar || "";
+          document.getElementById("paxFormPassport").value = m.passport || "";
+          document.getElementById("paxFormPayment").value = (trip.type === 'Local' ? m.amountPaid : m.advance) || "";
 
-                {/* ===================== VIEW 2: TRIP DETAIL ===================== */}
-                {view === 'tripDetail' && activeTrip && (
-                  <Box>
-                    {/* Fix Issue #2: Properly vertically centered "Back to Trips" Button and icon */}
-                    <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className="no-print">
-                      <Button
-                        variant="outlined"
-                        onClick={() => setView('trips')}
-                        sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          textTransform: 'none',
-                          fontWeight: 600
-                        }}
-                      >
-                        <span className="material-icons" style={{ fontSize: 18, lineHeight: 1, display: 'flex', alignItems: 'center' }}>arrow_back</span>
-                        <span>Back to Trips</span>
-                      </Button>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button variant="outlined" color="primary" onClick={() => handleOpenEditTrip(activeTrip)}>Edit Tour</Button>
-                        <Button variant="outlined" color="secondary" onClick={() => handleDuplicateTrip(activeTrip)}>Duplicate</Button>
-                        <Button variant="outlined" color="error" onClick={() => handleDeleteTrip(activeTrip.id, activeTrip.name)}>Delete</Button>
-                      </Box>
-                    </Box>
+          const isLocal = (trip.type || 'Local') === 'Local';
+          document.getElementById("paxNonLocalFields").style.display = isLocal ? 'none' : 'block';
+          document.getElementById("fieldAadhaarWrap").style.display = trip.type === 'Train/Flight' ? 'block' : 'none';
+          document.getElementById("fieldPassportWrap").style.display = trip.type === 'International' ? 'block' : 'none';
 
-                    {/* Header Summary Card */}
-                    <Card elevation={0} sx={{ p: 2.5, mb: 3, border: '1px solid #e2e8f0', borderRadius: 2 }}>
-                      <Typography variant="h5" sx={{ fontWeight: 800 }}>{activeTrip.name}</Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Category: <strong>{activeTrip.type}</strong> | Departure: <strong>{activeTrip.date || 'TBD'}</strong> | Price: <strong>₹{parseFloat(activeTrip.amount || 0).toLocaleString('en-IN')}</strong>
-                      </Typography>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6} sm={3}>
-                          <Typography variant="caption" color="text.secondary">BOOKINGS</Typography>
-                          <Typography variant="h6">{(activeTrip.members || []).length} / {activeTrip.totalSeats || '∞'}</Typography>
-                        </Grid>
-                        <Grid item xs={6} sm={3}>
-                          <Typography variant="caption" color="text.secondary">TOTAL COLLECTED</Typography>
-                          <Typography variant="h6" color="success.main">
-                            ₹{(activeTrip.members || []).reduce((acc, m) => acc + (activeTrip.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0)), 0).toLocaleString('en-IN')}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Card>
+          app.modal.open("modalPassenger");
+        }
+      },
 
-                    {/* Passenger Manifest Roster */}
-                    <Paper elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
-                      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-                        <Typography variant="subtitle1">Passenger Manifest ({(activeTrip.members || []).length})</Typography>
-                        <Box sx={{ display: 'flex', gap: 1 }} className="no-print">
-                          <Button size="small" variant="outlined" startIcon={<span className="material-icons">download</span>} onClick={handleExportCSV}>Export CSV</Button>
-                          <Button size="small" variant="outlined" startIcon={<span className="material-icons">print</span>} onClick={() => window.print()}>Print</Button>
-                          <Button size="small" variant="contained" color="primary" startIcon={<span className="material-icons">add</span>} onClick={handleOpenAddPax}>Add Passenger</Button>
-                        </Box>
-                      </Box>
+      toast(msg) {
+        const root = document.getElementById("toastRoot");
+        const el = document.createElement("div");
+        el.className = "toast";
+        el.textContent = msg;
+        root.appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+      }
+    };
 
-                      <TableContainer>
-                        <Table size="small">
-                          <TableHead sx={{ bgcolor: '#f8fafc' }}>
-                            <TableRow>
-                              <TableCell><strong>Seat</strong></TableCell>
-                              <TableCell><strong>Passenger Name</strong></TableCell>
-                              <TableCell><strong>Phone</strong></TableCell>
-                              <TableCell><strong>Gender / Age</strong></TableCell>
-                              <TableCell><strong>ID Verification</strong></TableCell>
-                              <TableCell><strong>Payment</strong></TableCell>
-                              <TableCell align="right" className="no-print"><strong>Actions</strong></TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {(activeTrip.members || []).map((m, idx) => {
-                              const tripPrice = parseFloat(activeTrip.amount) || 0;
-                              const paid = activeTrip.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
-                              const due = Math.max(0, tripPrice - paid);
-                              const cleanPhone = (m.phone || '').replace(/[^0-9]/g, '');
-                              const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-                              const waMsg = encodeURIComponent(`Hi ${m.name}, friendly reminder from Shanthi Tours for "${activeTrip.name}". Outstanding balance: ₹${due}. Thank you!`);
-
-                              return (
-                                <TableRow key={idx} hover>
-                                  <TableCell><Chip label={m.seat || '-'} size="small" sx={{ fontWeight: 700 }} /></TableCell>
-                                  <TableCell><strong>{m.name}</strong></TableCell>
-                                  <TableCell>{m.phone || '-'}</TableCell>
-                                  <TableCell>{m.gender} / {computeAge(m.dob)}</TableCell>
-                                  <TableCell>
-                                    <Chip
-                                      size="small"
-                                      variant="outlined"
-                                      label={
-                                        activeTrip.type === 'Train/Flight'
-                                          ? (m.aadhaar ? '[Aadhaar Redacted]' : 'No ID')
-                                          : (activeTrip.type === 'International' ? (m.passport || 'No Passport') : 'Verified')
-                                      }
-                                    />
-                                  </TableCell>
-                                  <TableCell>
-                                    <Chip label={due === 0 ? 'Paid' : `Due ₹${due.toLocaleString('en-IN')}`} size="small" color={due === 0 ? 'success' : 'error'} />
-                                  </TableCell>
-                                  <TableCell align="right" className="no-print">
-                                    {cleanPhone && (
-                                      <IconButton size="small" color="success" href={`https://wa.me/${waPhone}?text=${waMsg}`} target="_blank">
-                                        <span className="material-icons" style={{ fontSize: 18 }}>chat</span>
-                                      </IconButton>
-                                    )}
-                                    <IconButton size="small" color="primary" onClick={() => handleOpenEditPax(m, idx)}>
-                                      <span className="material-icons" style={{ fontSize: 18 }}>edit</span>
-                                    </IconButton>
-                                    <IconButton size="small" color="error" onClick={() => handleDeletePassenger(idx)}>
-                                      <span className="material-icons" style={{ fontSize: 18 }}>delete</span>
-                                    </IconButton>
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })}
-                            {(activeTrip.members || []).length === 0 && (
-                              <TableRow>
-                                <TableCell colSpan={7} align="center" sx={{ py: 3, color: 'text.secondary' }}>
-                                  No passengers added to this trip yet.
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Paper>
-                  </Box>
-                )}
-
-                {/* ===================== VIEW 3: PASSENGERS DIRECTORY ===================== */}
-                {view === 'passengers' && (
-                  <Paper elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 2 }}>
-                    <Box sx={{ p: 2 }}>
-                      <Typography variant="subtitle1">Consolidated Customer Directory</Typography>
-                      <Typography variant="caption" color="text.secondary">Lifetime bookings across all historical trips</Typography>
-                    </Box>
-                    <TableContainer>
-                      <Table size="small">
-                        <TableHead sx={{ bgcolor: '#f8fafc' }}>
-                          <TableRow>
-                            <TableCell><strong>Customer</strong></TableCell>
-                            <TableCell><strong>Phone</strong></TableCell>
-                            <TableCell align="center"><strong>Tours Count</strong></TableCell>
-                            <TableCell><strong>Tour History</strong></TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {(() => {
-                            const directory = {};
-                            trips.forEach(t => {
-                              (t.members || []).forEach(m => {
-                                const key = (m.phone && m.phone.trim()) ? m.phone.replace(/[^0-9]/g, '') : (m.name || 'Unnamed').toLowerCase().trim();
-                                if (!directory[key]) directory[key] = { name: m.name, phone: m.phone || '-', tours: [] };
-                                if (!directory[key].tours.includes(t.name)) directory[key].tours.push(t.name);
-                              });
-                            });
-                            return Object.values(directory).map((c, i) => (
-                              <TableRow key={i} hover>
-                                <TableCell><strong>{c.name}</strong></TableCell>
-                                <TableCell>{c.phone}</TableCell>
-                                <TableCell align="center"><Chip label={`${c.tours.length} Tours`} size="small" color="primary" /></TableCell>
-                                <TableCell sx={{ color: 'text.secondary', fontSize: 12 }}>{c.tours.join(', ')}</TableCell>
-                              </TableRow>
-                            ));
-                          })()}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </Paper>
-                )}
-
-                {/* ===================== VIEW 4: REPORTS & DUES ===================== */}
-                {view === 'reports' && (
-                  <Box>
-                    <Paper elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 2 }}>
-                      <Box sx={{ p: 2 }}>
-                        <Typography variant="subtitle1" color="error">Outstanding Passenger Balances</Typography>
-                        <Typography variant="caption" color="text.secondary">Sorted by highest outstanding dues first</Typography>
-                      </Box>
-                      <TableContainer>
-                        <Table size="small">
-                          <TableHead sx={{ bgcolor: '#f8fafc' }}>
-                            <TableRow>
-                              <TableCell><strong>Passenger</strong></TableCell>
-                              <TableCell><strong>Phone</strong></TableCell>
-                              <TableCell><strong>Tour</strong></TableCell>
-                              <TableCell><strong>Departure</strong></TableCell>
-                              <TableCell><strong>Due (₹)</strong></TableCell>
-                              <TableCell align="right"><strong>Action</strong></TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {(() => {
-                              const dues = [];
-                              trips.forEach(t => {
-                                const price = parseFloat(t.amount) || 0;
-                                (t.members || []).forEach(m => {
-                                  const paid = t.type === 'Local' ? (parseFloat(m.amountPaid) || 0) : (parseFloat(m.advance) || 0);
-                                  const due = Math.max(0, price - paid);
-                                  if (due > 0) dues.push({ name: m.name, phone: m.phone, trip: t.name, date: t.date, due });
-                                });
-                              });
-                              dues.sort((a, b) => b.due - a.due);
-
-                              return dues.map((d, i) => {
-                                const clean = (d.phone || '').replace(/[^0-9]/g, '');
-                                const wa = clean.length === 10 ? '91' + clean : clean;
-                                const msg = encodeURIComponent(`Hello ${d.name}, reminder from Shanthi Tours regarding "${d.trip}". Balance due: ₹${d.due}.`);
-
-                                return (
-                                  <TableRow key={i} hover>
-                                    <TableCell><strong>{d.name}</strong></TableCell>
-                                    <TableCell>{d.phone || '-'}</TableCell>
-                                    <TableCell>{d.trip}</TableCell>
-                                    <TableCell>{d.date || 'TBD'}</TableCell>
-                                    <TableCell sx={{ color: 'error.main', fontWeight: 700 }}>₹{d.due.toLocaleString('en-IN')}</TableCell>
-                                    <TableCell align="right">
-                                      {clean ? (
-                                        <Button size="small" variant="contained" color="success" href={`https://wa.me/${wa}?text=${msg}`} target="_blank">
-                                          Remind
-                                        </Button>
-                                      ) : '-'}
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              });
-                            })()}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Paper>
-                  </Box>
-                )}
-              </Container>
-            </Box>
-          </Box>
-
-          {/* Mobile Bottom Navigation */}
-          {isMobile && (
-            <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100 }} elevation={3} className="no-print">
-              <BottomNavigation
-                showLabels
-                value={view === 'tripDetail' ? 'trips' : view}
-                onChange={(e, val) => setView(val)}
-              >
-                <BottomNavigationAction label="Trips" value="trips" icon={<span className="material-icons">map</span>} />
-                <BottomNavigationAction label="Passengers" value="passengers" icon={<span className="material-icons">group</span>} />
-                <BottomNavigationAction label="Reports" value="reports" icon={<span className="material-icons">bar_chart</span>} />
-              </BottomNavigation>
-            </Paper>
-          )}
-
-          {/* ===================== MATERIAL DIALOG: CREATE / EDIT TRIP (Fix Issue #3: Red Asterisks) ===================== */}
-          <Dialog open={tripDialogOpen} onClose={() => setTripDialogOpen(false)} fullWidth maxWidth="sm">
-            <DialogTitle>{editTripId ? 'Edit Tour' : 'Create New Tour'}</DialogTitle>
-            <DialogContent dividers>
-              <TextField
-                fullWidth
-                label={<>Tour Title <Req /></>}
-                value={tripForm.name}
-                onChange={(e) => setTripForm({ ...tripForm, name: e.target.value })}
-                margin="normal"
-                size="small"
-              />
-              <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                <Grid item xs={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="trip-cat-label">Category <Req /></InputLabel>
-                    <Select labelId="trip-cat-label" value={tripForm.type} label={<>Category <Req /></>} onChange={(e) => setTripForm({ ...tripForm, type: e.target.value })}>
-                      <MenuItem value="Local">Local</MenuItem>
-                      <MenuItem value="Train/Flight">Train/Flight</MenuItem>
-                      <MenuItem value="International">International</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField fullWidth type="date" label={<>Departure Date <Req /></>} InputLabelProps={{ shrink: true }} value={tripForm.date} onChange={(e) => setTripForm({ ...tripForm, date: e.target.value })} size="small" />
-                </Grid>
-              </Grid>
-              <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                <Grid item xs={6}>
-                  <TextField fullWidth type="number" label="Price Per Person (₹)" value={tripForm.amount} onChange={(e) => setTripForm({ ...tripForm, amount: e.target.value })} size="small" />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField fullWidth type="number" label={<>Total Seats <Req /></>} value={tripForm.totalSeats} onChange={(e) => setTripForm({ ...tripForm, totalSeats: e.target.value })} size="small" />
-                </Grid>
-              </Grid>
-              <TextField fullWidth multiline rows={2} label="Operational Notes" value={tripForm.notes} onChange={(e) => setTripForm({ ...tripForm, notes: e.target.value })} margin="normal" size="small" />
-            </DialogContent>
-            <DialogActions sx={{ p: 2 }}>
-              <Button onClick={() => setTripDialogOpen(false)}>Cancel</Button>
-              <Button variant="contained" onClick={handleSaveTrip}>Save Tour</Button>
-            </DialogActions>
-          </Dialog>
-
-          {/* ===================== MATERIAL DIALOG: ADD / EDIT PASSENGER (Fix Issue #3: Red Asterisks) ===================== */}
-          <Dialog open={paxDialogOpen} onClose={() => setPaxDialogOpen(false)} fullWidth maxWidth="sm">
-            <DialogTitle>{editPaxIndex >= 0 ? 'Edit Passenger' : 'Add Passenger to Roster'}</DialogTitle>
-            <DialogContent dividers>
-              <Grid container spacing={2} sx={{ mt: 0.2 }}>
-                <Grid item xs={4}>
-                  <TextField fullWidth label={<>Seat # <Req /></>} value={paxForm.seat} onChange={(e) => setPaxForm({ ...paxForm, seat: e.target.value })} size="small" />
-                </Grid>
-                <Grid item xs={8}>
-                  <TextField fullWidth label={<>Full Name <Req /></>} value={paxForm.name} onChange={(e) => setPaxForm({ ...paxForm, name: e.target.value })} size="small" />
-                </Grid>
-              </Grid>
-              <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                <Grid item xs={6}>
-                  <TextField fullWidth label="Phone" value={paxForm.phone} onChange={(e) => setPaxForm({ ...paxForm, phone: e.target.value })} size="small" />
-                </Grid>
-                <Grid item xs={6}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="pax-gender-label">Gender</InputLabel>
-                    <Select labelId="pax-gender-label" value={paxForm.gender} label="Gender" onChange={(e) => setPaxForm({ ...paxForm, gender: e.target.value })}>
-                      <MenuItem value="Male">Male</MenuItem>
-                      <MenuItem value="Female">Female</MenuItem>
-                      <MenuItem value="Other">Other</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-
-              {activeTrip && activeTrip.type !== 'Local' && (
-                <Box sx={{ mt: 2 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={8}>
-                      <TextField fullWidth type="date" label="Date of Birth" InputLabelProps={{ shrink: true }} value={paxForm.dob} onChange={(e) => setPaxForm({ ...paxForm, dob: e.target.value })} size="small" />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <TextField fullWidth label="Live Age" value={computeAge(paxForm.dob)} InputProps={{ readOnly: true }} size="small" />
-                    </Grid>
-                  </Grid>
-
-                  {activeTrip.type === 'Train/Flight' && (
-                    <TextField fullWidth label="Aadhaar Number (12 Digits)" value={paxForm.aadhaar} onChange={(e) => setPaxForm({ ...paxForm, aadhaar: e.target.value })} margin="normal" size="small" />
-                  )}
-                  {activeTrip.type === 'International' && (
-                    <TextField fullWidth label="Passport Number" value={paxForm.passport} onChange={(e) => setPaxForm({ ...paxForm, passport: e.target.value })} margin="normal" size="small" />
-                  )}
-                </Box>
-              )}
-
-              <TextField
-                fullWidth
-                type="number"
-                label={activeTrip && activeTrip.type === 'Local' ? "Amount Paid (₹)" : "Advance Paid (₹)"}
-                value={paxForm.payment}
-                onChange={(e) => setPaxForm({ ...paxForm, payment: e.target.value })}
-                margin="normal"
-                size="small"
-              />
-            </DialogContent>
-            <DialogActions sx={{ p: 2 }}>
-              <Button onClick={() => setPaxDialogOpen(false)}>Cancel</Button>
-              <Button variant="contained" onClick={handleSavePassenger}>Save Passenger</Button>
-            </DialogActions>
-          </Dialog>
-
-          {/* Feedback Snackbar */}
-          <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-            <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
-          </Snackbar>
-        </ThemeProvider>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    window.addEventListener("DOMContentLoaded", () => app.init());
   </script>
 </body>
 </html>
