@@ -17,6 +17,7 @@
  --success-soft:#dcfce7;--warning:#d97706;--warning-soft:#fef3c7;
  --danger:#dc2626;--danger-soft:#fee2e2;--bar:#e2e8f0;--sidebar:240px;
  --radius:12px;--shadow:0 1px 2px rgba(15,23,42,.04);
+ --badge-indigo-bg:#eef2ff;--badge-indigo-text:#4f46e5;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -24,19 +25,35 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 a{text-decoration:none;color:inherit}
+
+/* Prevent text/I-beam cursors on headings and multi-line descriptive text */
+h1, h2, h3, h4, h5, h6,
+.page-head h1, .page-head p,
+.trip-name, .trip-date,
+.section-title h2, .section-title span,
+.kpi-label, .kpi-value, .kpi-sub,
+.list-main b, .list-main small,
+.attention b, .attention small,
+.detail-stat span, .detail-stat strong {
+  cursor: default;
+  user-select: none;
+}
+
 .app{min-height:100vh;display:flex}
 .sidebar{width:var(--sidebar);position:fixed;inset:0 auto 0 0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
-.brand{height:68px;padding:0 20px;display:flex;align-items:center;border-bottom:1px solid var(--border);font-weight:800;font-size:17px}
+.brand{height:68px;padding:0 20px;display:flex;align-items:center;border-bottom:1px solid var(--border);font-weight:800;font-size:17px;cursor:default;user-select:none}
 .brand-mark{width:34px;height:34px;border-radius:9px;background:var(--primary);color:white;display:grid;place-items:center;margin-right:10px;font-size:17px}
 .nav{padding:14px 10px;display:flex;flex-direction:column;gap:4px}
 .nav button{border:0;background:transparent;color:var(--muted);padding:11px 12px;border-radius:9px;text-align:left;font-weight:600;font-size:13px;display:flex;align-items:center;gap:10px}
+.nav button svg{width:18px;height:18px;stroke-width:2;flex-shrink:0}
 .nav button:hover{background:var(--bg);color:var(--text)}
 .nav button.active{background:var(--primary-soft);color:var(--primary)}
-.sidebar-footer{margin-top:auto;padding:14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+.sidebar-footer{margin-top:auto;padding:14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);cursor:default;user-select:none}
 .main{margin-left:var(--sidebar);min-width:0;flex:1}
 .topbar{height:68px;background:rgba(255,255,255,.94);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:0 28px;backdrop-filter:blur(10px)}
-.top-left{display:flex;align-items:center;gap:12px}.page-title{font-size:17px;font-weight:800}.hamb{display:none;border:0;background:transparent;font-size:22px}
-.connection{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--muted)}
+.top-left{display:flex;align-items:center;gap:12px}.page-title{font-size:17px;font-weight:800;cursor:default;user-select:none}
+.hamb{display:none;border:0;background:transparent;font-size:22px}
+.connection{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--muted);cursor:default;user-select:none}
 .connection .dot{width:7px;height:7px;border-radius:50%;background:#94a3b8}.connection.online{color:var(--success)}.connection.online .dot{background:var(--success)}
 .content{max-width:1280px;margin:auto;padding:28px}
 .view{display:none}.view.active{display:block}
@@ -49,47 +66,118 @@ a{text-decoration:none;color:inherit}
 .btn.danger{background:var(--danger-soft);color:var(--danger);border-color:#fecaca}
 .btn.success{background:var(--success);color:#fff}.btn.wa{background:#16a34a;color:#fff}.btn.sm{height:32px;padding:0 10px;font-size:11px;border-radius:7px}
 .toolbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;display:flex;gap:8px;align-items:center;margin-bottom:14px}
-.search{position:relative;flex:1}.search span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8}.search input{padding-left:34px}
+.search{position:relative;flex:1}.search span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none}.search input{padding-left:34px}
 .input{height:40px;width:100%;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none;font-size:13px}
 textarea.input{height:auto;padding:10px;resize:vertical}.input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
-select.input{cursor:pointer}
+
+/* Fix dropdown arrow spacing & styling */
+select.input{
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  padding:0 34px 0 12px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  background-size:15px;
+}
 .filter-select{width:150px}
-.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:9px;margin-bottom:14px;width:max-content;max-width:100%;overflow:auto}
-.tab{border:0;background:transparent;color:var(--muted);font-weight:700;font-size:12px;padding:8px 12px;border-radius:7px;white-space:nowrap}.tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
-.tab-count{opacity:.65;margin-left:3px}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 .trip-card{padding:16px;min-width:0;transition:.15s;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);cursor:pointer}
 .trip-card:hover{border-color:#bfdbfe;box-shadow:0 5px 18px rgba(15,23,42,.06);transform:translateY(-1px)}
 .trip-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.trip-name{font-size:16px;font-weight:800;margin:0;line-height:1.3}.trip-date{font-size:12px;color:var(--muted);margin-top:5px}
-.badges{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:800;white-space:nowrap}
-.badge.blue{background:var(--primary-soft);color:var(--primary)}.badge.green{background:var(--success-soft);color:var(--success)}.badge.yellow{background:var(--warning-soft);color:var(--warning)}.badge.red{background:var(--danger-soft);color:var(--danger)}.badge.gray{background:var(--bg);color:var(--muted)}
-.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.metric{padding:9px;background:var(--bg);border-radius:8px}.metric label{display:block;font-size:10px;color:var(--muted);margin-bottom:3px}.metric strong{font-size:13px}
+
+/* Distinct tag colors avoiding primary button blue */
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:800;white-space:nowrap;user-select:none}
+.badge.indigo{background:var(--badge-indigo-bg);color:var(--badge-indigo-text)}
+.badge.green{background:var(--success-soft);color:var(--success)}
+.badge.yellow{background:var(--warning-soft);color:var(--warning)}
+.badge.red{background:var(--danger-soft);color:var(--danger)}
+.badge.gray{background:var(--bg);color:var(--muted)}
+
+.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.metric{padding:9px;background:var(--bg);border-radius:8px}.metric label{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;cursor:default;user-select:none}.metric strong{font-size:13px;cursor:default}
 .progress{height:7px;background:var(--bar);border-radius:99px;overflow:hidden}.progress>i{display:block;height:100%;background:var(--primary);border-radius:99px}
-.card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);margin-top:14px;padding-top:12px;font-size:11px;color:var(--muted)}
-.empty{padding:50px 20px;text-align:center;color:var(--muted)}.empty strong{display:block;color:var(--text);margin-bottom:5px}
+.card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);margin-top:14px;padding-top:12px;font-size:11px;color:var(--muted);cursor:default;user-select:none}
+.empty{padding:50px 20px;text-align:center;color:var(--muted);cursor:default;user-select:none}.empty strong{display:block;color:var(--text);margin-bottom:5px}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.kpi{padding:16px}.kpi-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}.kpi-value{font-size:25px;font-weight:800;margin-top:7px}.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
 .dashboard-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.section{padding:18px}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.section-title h2{font-size:14px;margin:0;font-weight:800}.section-title span{font-size:11px;color:var(--muted)}
 .attention-list{display:flex;flex-direction:column;gap:8px}.attention{display:flex;align-items:center;gap:10px;padding:11px;background:var(--bg);border-radius:9px}.attention-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--warning-soft);color:var(--warning);font-weight:800}.attention b{font-size:12px}.attention small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
 .simple-list{display:flex;flex-direction:column}.list-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}.list-row:last-child{border-bottom:0}.list-main{min-width:0}.list-main b{font-size:12px}.list-main small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.amount{font-weight:800;font-size:12px;white-space:nowrap}
-.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:9px}.table{width:100%;border-collapse:collapse;font-size:12px;min-width:700px}.table th{text-align:left;background:var(--bg);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:10px;border-bottom:1px solid var(--border)}.table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}.table tr:last-child td{border-bottom:0}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:9px}.table{width:100%;border-collapse:collapse;font-size:12px;min-width:700px}.table th{text-align:left;background:var(--bg);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:10px;border-bottom:1px solid var(--border);cursor:default;user-select:none}.table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}.table tr:last-child td{border-bottom:0}
 .detail-head{margin-bottom:16px}.back{border:0;background:transparent;color:var(--muted);font-weight:700;padding:0;margin-bottom:12px}.detail-hero{padding:20px}.detail-hero-top{display:flex;justify-content:space-between;gap:15px}.detail-hero h1{font-size:24px;margin:0 0 7px}.detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}.detail-stat{padding:11px;background:var(--bg);border-radius:8px}.detail-stat span{font-size:10px;color:var(--muted);display:block}.detail-stat strong{font-size:14px;display:block;margin-top:3px}
 .detail-tabs{display:flex;gap:5px;margin:14px 0}.detail-tab{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--muted)}.detail-tab.active{color:var(--primary);border-color:#bfdbfe;background:var(--primary-soft)}
 .pax-list{display:flex;flex-direction:column;gap:8px}.pax{border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--surface)}.pax-top{display:flex;justify-content:space-between;gap:10px}.pax-name{font-size:14px;font-weight:800}.seat{display:inline-flex;padding:3px 7px;border-radius:6px;background:var(--bg);font-size:10px;font-weight:800;margin-right:5px}.pax-info{display:flex;flex-wrap:wrap;gap:7px 14px;color:var(--muted);font-size:11px;margin:8px 0}.pax-bottom{border-top:1px dashed var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}.pax-actions{display:flex;gap:5px}
 .customer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.customer{padding:15px}.customer h3{margin:0;font-size:14px}.customer p{margin:4px 0;color:var(--muted);font-size:11px}.customer-stats{display:flex;gap:8px;margin-top:12px}.customer-stats span{background:var(--bg);padding:6px 8px;border-radius:7px;font-size:10px}
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:200}.overlay.open{display:flex}
-.sheet{width:min(620px,100%);max-height:92vh;overflow:auto;background:var(--surface);border-radius:16px 16px 0 0;padding:22px;animation:up .2s ease}.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.sheet-head h2{margin:0;font-size:17px}.close{border:0;background:var(--bg);width:32px;height:32px;border-radius:8px;font-size:16px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-bottom:11px}.field.full{grid-column:1/-1}.field label{display:block;font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;margin-bottom:5px}.form-actions{display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:14px;margin-top:6px}
+.sheet{width:min(620px,100%);max-height:92vh;overflow:auto;background:var(--surface);border-radius:16px 16px 0 0;padding:22px;animation:up .2s ease}.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.sheet-head h2{margin:0;font-size:17px}.close{border:0;background:var(--bg);width:32px;height:32px;border-radius:8px;font-size:16px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-bottom:11px}.field.full{grid-column:1/-1}.field label{display:block;font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;margin-bottom:5px;cursor:default;user-select:none}.form-actions{display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:14px;margin-top:6px}
 .payment-list{border:1px solid var(--border);border-radius:8px;margin-top:8px}.payment{display:flex;justify-content:space-between;padding:9px 10px;border-bottom:1px solid var(--border);font-size:11px}.payment:last-child{border-bottom:0}.payment small{color:var(--muted)}
 .toast{position:fixed;right:18px;bottom:18px;background:#0f172a;color:white;padding:11px 14px;border-radius:9px;font-size:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:500;display:none}.toast.show{display:block;animation:fade .2s}
 .bottom-nav{display:none}
 .loading{padding:30px;text-align:center;color:var(--muted);font-size:12px}
 @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.customer-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Mobile specific styling */
 @media(max-width:760px){
- :root{--sidebar:0px}.sidebar{transform:translateX(-100%);width:250px;box-shadow:8px 0 30px rgba(0,0,0,.12)}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding-bottom:64px}.topbar{padding:0 16px;height:60px}.hamb{display:block}.content{padding:18px 14px}.page-head{align-items:center}.page-head h1{font-size:21px}.page-head p{font-size:11px}.page-head .actions .secondary{display:none}.toolbar{flex-wrap:wrap}.search{flex-basis:100%}.filter-select{flex:1;width:auto}.grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.dashboard-grid{grid-template-columns:1fr}.detail-stats{grid-template-columns:1fr 1fr}.customer-grid{grid-template-columns:1fr}.detail-hero-top{display:block}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.sheet{padding:18px 14px 24px}.bottom-nav{position:fixed;display:flex;left:0;right:0;bottom:0;height:62px;background:rgba(255,255,255,.97);border-top:1px solid var(--border);z-index:120;justify-content:space-around;padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(10px)}.bottom-nav button{flex:1;border:0;background:transparent;color:var(--muted);font-size:10px;font-weight:700}.bottom-nav button.active{color:var(--primary)}.bottom-nav i{display:block;font-style:normal;font-size:18px;margin-bottom:2px}.trip-card{padding:14px}.actions{width:100%}.actions .btn{flex:1}.detail-hero{padding:15px}}
+ :root{--sidebar:0px}
+ .sidebar{transform:translateX(-100%);width:250px;box-shadow:8px 0 30px rgba(0,0,0,.12)}
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-left:0;padding-bottom:64px}
+ .topbar{padding:0 16px;height:60px}
+ /* Point 3: Hamburger menu removed on mobile */
+ .hamb{display:none !important}
+ .content{padding:18px 14px}
+ .page-head{align-items:center}
+ .page-head h1{font-size:21px}
+ .page-head p{font-size:11px}
+ .page-head .actions .secondary{display:none}
+ .toolbar{flex-wrap:wrap}
+ .search{flex-basis:100%}
+ .filter-select{flex:1;width:auto}
+ .grid{grid-template-columns:1fr}
+ .kpis{grid-template-columns:1fr 1fr}
+ .dashboard-grid{grid-template-columns:1fr}
+ .detail-stats{grid-template-columns:1fr 1fr}
+ .customer-grid{grid-template-columns:1fr}
+ .detail-hero-top{display:block}
+ .form-grid{grid-template-columns:1fr}
+ .field.full{grid-column:auto}
+ .sheet{padding:18px 14px 24px}
+ .bottom-nav{
+   position:fixed;display:flex;left:0;right:0;bottom:0;height:62px;
+   background:rgba(255,255,255,.97);border-top:1px solid var(--border);
+   z-index:120;justify-content:space-around;padding-bottom:env(safe-area-inset-bottom);
+   backdrop-filter:blur(10px);
+ }
+ .bottom-nav button{
+   flex:1;border:0;background:transparent;color:var(--muted);
+   font-size:10px;font-weight:700;display:flex;flex-direction:column;
+   align-items:center;justify-content:center;gap:3px;
+ }
+ .bottom-nav button.active{color:var(--primary)}
+ .bottom-nav svg{width:20px;height:20px;stroke-width:2}
+ .trip-card{padding:14px}
+ .actions{width:100%}
+ .actions .btn{flex:1}
+ .detail-hero{padding:15px}
+}
+
 @media(prefers-color-scheme:dark){
- :root{--bg:#0b1220;--surface:#111a2b;--text:#f8fafc;--muted:#94a3b8;--border:#24324a;--primary-soft:#172554;--bar:#26344c;--success-soft:#052e16;--warning-soft:#451a03;--danger-soft:#450a0a}
- .topbar{background:rgba(17,26,43,.94)}.input{background:var(--surface);color:var(--text)}.bottom-nav{background:rgba(17,26,43,.97)}
+ :root{
+   --bg:#0b1220;--surface:#111a2b;--text:#f8fafc;--muted:#94a3b8;
+   --border:#24324a;--primary-soft:#172554;--bar:#26344c;
+   --success-soft:#052e16;--warning-soft:#451a03;--danger-soft:#450a0a;
+   --badge-indigo-bg:#1e1b4b;--badge-indigo-text:#a5b4fc;
+ }
+ .topbar{background:rgba(17,26,43,.94)}
+ .input{background:var(--surface);color:var(--text)}
+ .bottom-nav{background:rgba(17,26,43,.97)}
+ select.input{
+   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+ }
 }
 </style>
 </head>
@@ -98,9 +186,21 @@ select.input{cursor:pointer}
 <aside id="sidebar" class="sidebar">
  <div class="brand"><span class="brand-mark">S</span> Shanthi Tours</div>
  <nav class="nav">
-  <button id="navTrips" class="active" onclick="navigate('trips')">▣ <span>Trips</span></button>
-  <button id="navCustomers" onclick="navigate('customers')">♙ <span>Customers</span></button>
-  <button id="navReports" onclick="navigate('reports')">▤ <span>Reports</span></button>
+  <!-- Tabler Icon: compass -->
+  <button id="navTrips" class="active" onclick="navigate('trips')">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><polygon points="12 3 14.5 9.5 21 12 14.5 14.5 12 21 9.5 14.5 3 12 9.5 9.5 12 3"/></svg>
+   <span>Trips</span>
+  </button>
+  <!-- Tabler Icon: users -->
+  <button id="navCustomers" onclick="navigate('customers')">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></svg>
+   <span>Customers</span>
+  </button>
+  <!-- Tabler Icon: chart-bar -->
+  <button id="navReports" onclick="navigate('reports')">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><rect x="3" y="4" width="18" height="16" rx="2" style="display:none"/></svg>
+   <span>Reports</span>
+  </button>
  </nav>
  <div class="sidebar-footer">Trip management workspace</div>
 </aside>
@@ -114,9 +214,17 @@ select.input{cursor:pointer}
  <div class="content">
   <section id="viewTrips" class="view active">
    <div class="page-head"><div><h1>Trips</h1><p>Manage upcoming journeys, passengers and collections.</p></div><div class="actions"><button class="btn" onclick="openTripForm()">＋ New Trip</button></div></div>
-   <div class="tabs" id="tripTabs"></div>
+   
+   <!-- Status dropdown placed directly between Search and Date dropdown -->
    <div class="toolbar">
     <div class="search"><span>⌕</span><input id="tripSearch" class="input" placeholder="Search trips…" oninput="renderTrips()"></div>
+    <select id="tripStatusFilter" class="input filter-select" onchange="renderTrips()">
+     <option value="Upcoming">Upcoming</option>
+     <option value="Ongoing">Ongoing</option>
+     <option value="Completed">Completed</option>
+     <option value="Cancelled">Cancelled</option>
+     <option value="All">All statuses</option>
+    </select>
     <select id="tripDate" class="input filter-select" onchange="renderTrips()"><option value="all">All dates</option><option value="upcoming">Upcoming</option><option value="past">Past</option></select>
     <select id="tripSort" class="input filter-select" onchange="renderTrips()"><option value="date">Departure date</option><option value="created">Recently added</option><option value="capacity">Capacity</option><option value="dues">Outstanding</option></select>
    </div>
@@ -153,9 +261,18 @@ select.input{cursor:pointer}
 </div>
 
 <nav class="bottom-nav">
- <button id="bottomTrips" class="active" onclick="navigate('trips')"><i>▣</i>Trips</button>
- <button id="bottomCustomers" onclick="navigate('customers')"><i>♙</i>Customers</button>
- <button id="bottomReports" onclick="navigate('reports')"><i>▤</i>Reports</button>
+ <button id="bottomTrips" class="active" onclick="navigate('trips')">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><polygon points="12 3 14.5 9.5 21 12 14.5 14.5 12 21 9.5 14.5 3 12 9.5 9.5 12 3"/></svg>
+  <span>Trips</span>
+ </button>
+ <button id="bottomCustomers" onclick="navigate('customers')">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></svg>
+  <span>Customers</span>
+ </button>
+ <button id="bottomReports" onclick="navigate('reports')">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg>
+  <span>Reports</span>
+ </button>
 </nav>
 
 <div id="modal" class="overlay" onclick="backdropClose(event)">
@@ -180,7 +297,7 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
 let trips=[];
-let currentView="trips",currentTab="Upcoming",detailId=null,detailTab="passengers",modalState={};
+let currentView="trips",detailId=null,detailTab="passengers",modalState={};
 
 const $=id=>document.getElementById(id);
 const money=n=>"₹"+(Number(n)||0).toLocaleString("en-IN");
@@ -189,7 +306,9 @@ const today=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth()
 const parseDate=s=>s?new Date(s+"T00:00:00"):null;
 const daysUntil=s=>{const d=parseDate(s);return d?Math.ceil((d-today())/86400000):null};
 const dateLabel=s=>{const d=parseDate(s);return d?d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}):"Date not set"};
-const typeBadge=t=>t==="International"?"green":t==="Train/Flight"?"blue":"gray";
+
+// Tags use indigo/purple or other distinct colors instead of CTA primary blue
+const typeBadge=t=>t==="International"?"green":t==="Train/Flight"?"indigo":"gray";
 function tripStatus(t){
  if(t.status==="Cancelled") return "Cancelled";
  if(t.status==="Completed") return "Completed";
@@ -204,7 +323,7 @@ function dueFor(t,m){return Math.max(0,(Number(t.amount)||0)-paidFor(t,m))}
 function paymentStatus(t,m){const d=dueFor(t,m);return d<=0?"Paid":paidFor(t,m)>0?"Partial":"Due"}
 function tripExpected(t){return (t.members||[]).length*(Number(t.amount)||0)}
 function tripCollected(t){return (t.members||[]).reduce((s,m)=>s+paidFor(t,m),0)}
-function statusBadge(s){const c=s==="Completed"||s==="Paid"?"green":s==="Cancelled"||s==="Due"?"red":s==="Partial"?"yellow":"blue";return `<span class="badge ${c}">${esc(s)}</span>`}
+function statusBadge(s){const c=s==="Completed"||s==="Paid"?"green":s==="Cancelled"||s==="Due"?"red":s==="Partial"?"yellow":"indigo";return `<span class="badge ${c}">${esc(s)}</span>`}
 function showToast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(showToast.t);showToast.t=setTimeout(()=>el.classList.remove("show"),2400)}
 function openDrawer(){$("sidebar").classList.add("open");$("drawerShade").classList.add("open")}
 function closeDrawer(){$("sidebar").classList.remove("open");$("drawerShade").classList.remove("open")}
@@ -219,15 +338,17 @@ function navigate(view){
  closeDrawer();
  if(view==="trips")renderTrips(); if(view==="customers")renderCustomers(); if(view==="reports")renderReports();
 }
-function renderTripTabs(){
- const counts={Upcoming:0,Ongoing:0,Completed:0,Cancelled:0};
- trips.forEach(t=>counts[tripStatus(t)]++);
- $("tripTabs").innerHTML=["Upcoming","Ongoing","Completed","Cancelled"].map(s=>`<button class="tab ${currentTab===s?"active":""}" onclick="currentTab='${s}';renderTripTabs();renderTrips()">${s}<span class="tab-count">${counts[s]}</span></button>`).join("");
-}
+
 function renderTrips(){
- renderTripTabs();
- const q=($("tripSearch").value||"").trim().toLowerCase(),df=$("tripDate").value,sort=$("tripSort").value;
- let data=trips.filter(t=>tripStatus(t)===currentTab);
+ const q=($("tripSearch").value||"").trim().toLowerCase(),
+       selectedStatus=$("tripStatusFilter").value,
+       df=$("tripDate").value,
+       sort=$("tripSort").value;
+ 
+ let data=trips;
+ if(selectedStatus!=="All") {
+   data=data.filter(t=>tripStatus(t)===selectedStatus);
+ }
  if(q)data=data.filter(t=>(t.name||"").toLowerCase().includes(q)||(t.type||"").toLowerCase().includes(q));
  if(df==="upcoming")data=data.filter(t=>daysUntil(t.date)>=0);
  if(df==="past")data=data.filter(t=>daysUntil(t.date)<0);
@@ -237,17 +358,18 @@ function renderTrips(){
   if(sort==="capacity")return capacity(b).pct-capacity(a).pct;
   if(sort==="dues")return (tripExpected(b)-tripCollected(b))-(tripExpected(a)-tripCollected(a));
  });
- $("tripGrid").innerHTML=data.length?data.map(tripCard).join(""):`<div class="card empty" style="grid-column:1/-1"><strong>No ${currentTab.toLowerCase()} trips</strong>Try another filter or create a new trip.</div>`;
+ $("tripGrid").innerHTML=data.length?data.map(tripCard).join(""):`<div class="card empty" style="grid-column:1/-1"><strong>No trips found</strong>Try another filter or create a new trip.</div>`;
 }
+
 function tripCard(t){
  const c=capacity(t),days=daysUntil(t.date),due=tripExpected(t)-tripCollected(t),s=tripStatus(t);
  const dayText=days===null?"":days<0?"Past":days===0?"Today":days===1?"Tomorrow":`${days} days`;
  const capLabel=c.total?`${c.booked}/${c.total} seats`:`${c.booked} booked`;
  return `<article class="trip-card" onclick="openDetail('${t.id}')">
   <div class="trip-top"><div><h3 class="trip-name">${esc(t.name||"Untitled trip")}</h3><div class="trip-date">${dateLabel(t.date)}${dayText?` · ${dayText}`:""}</div></div>${statusBadge(s)}</div>
-  <div class="badges"><span class="badge ${typeBadge(t.type)}">${esc(t.type||"Local")}</span><span class="badge ${c.total&&c.pct>=100?"red":c.total&&c.pct>=80?"yellow":"blue"}">${capLabel}</span></div>
+  <div class="badges"><span class="badge ${typeBadge(t.type)}">${esc(t.type||"Local")}</span><span class="badge ${c.total&&c.pct>=100?"red":c.total&&c.pct>=80?"yellow":"indigo"}">${capLabel}</span></div>
   <div class="metric-row"><div class="metric"><label>Package</label><strong>${money(t.amount)}</strong></div><div class="metric"><label>Outstanding</label><strong style="color:${due?"var(--danger)":"var(--success)"}">${money(due)}</strong></div></div>
-  ${c.total?`<div class="progress"><i style="width:${c.pct}%;background:${c.pct>=100?"var(--danger)":c.pct>=80?"var(--warning)":"var(--primary)"}"></i></div>`:""}
+  ${c.total?`<div class="progress"><i style="width:${c.pct}\%;background:${c.pct>=100?"var(--danger)":c.pct>=80?"var(--warning)":"var(--primary)"}"></i></div>`:""}
   <div class="card-footer"><span>${c.total?`${c.available} seats available`:"Seat capacity not set"}</span><b style="color:var(--primary)">Manage →</b></div>
  </article>`;
 }
@@ -261,7 +383,7 @@ function renderDetail(){
   <div class="detail-hero-top"><div><h1>${esc(t.name)}</h1><div class="badges"><span class="badge ${typeBadge(t.type)}">${esc(t.type||"Local")}</span>${statusBadge(tripStatus(t))}</div><div class="trip-date">${dateLabel(t.date)}${daysUntil(t.date)!==null?` · ${daysUntil(t.date)<0?"Past":daysUntil(t.date)===0?"Today":daysUntil(t.date)===1?"Tomorrow":daysUntil(t.date)+" days remaining"}`:""}</div></div>
   <div class="actions"><button class="btn secondary sm" onclick="openTripForm('${t.id}')">Edit trip</button><button class="btn secondary sm" onclick="duplicateTrip('${t.id}')">Duplicate</button><button class="btn danger sm" onclick="deleteTrip('${t.id}')">Delete</button></div></div>
   <div class="detail-stats"><div class="detail-stat"><span>Seats</span><strong>${c.booked}/${c.total||"—"}</strong></div><div class="detail-stat"><span>Package / person</span><strong>${money(t.amount)}</strong></div><div class="detail-stat"><span>Collected</span><strong style="color:var(--success)">${money(col)}</strong></div><div class="detail-stat"><span>Outstanding</span><strong style="color:${due?"var(--danger)":"var(--success)"}">${money(due)}</strong></div></div>
-  ${c.total?`<div style="margin-top:14px"><div class="progress"><i style="width:${c.pct}%;background:${c.pct>=100?"var(--danger)":c.pct>=80?"var(--warning)":"var(--primary)"}"></i></div><small style="color:var(--muted);font-size:10px">${c.pct}% capacity · ${c.available} seats available</small></div>`:""}
+  ${c.total?`<div style="margin-top:14px"><div class="progress"><i style="width:${c.pct}\%;background:${c.pct>=100?"var(--danger)":c.pct>=80?"var(--warning)":"var(--primary)"}"></i></div><small style="color:var(--muted);font-size:10px">${c.pct}\% capacity · ${c.available} seats available</small></div>`:""}
  </div>
  <div class="detail-tabs"><button class="detail-tab ${detailTab==="passengers"?"active":""}" onclick="detailTab='passengers';renderDetail()">Passengers (${c.booked})</button><button class="detail-tab ${detailTab==="payments"?"active":""}" onclick="detailTab='payments';renderDetail()">Payments</button><button class="detail-tab ${detailTab==="info"?"active":""}" onclick="detailTab='info';renderDetail()">Trip info</button></div>
  <div class="card section">${detailTab==="passengers"?renderPassengers(t):detailTab==="payments"?renderTripPayments(t):renderTripInfo(t)}</div>`;
@@ -307,7 +429,7 @@ function openTripForm(id=null){
 }
 function saveTrip(e){
  e.preventDefault();const id=modalState.id;
- const data={name:$("fName").value.trim(),type:$("fType").value,date:$("fDate").value,totalSeats:Number($("fSeats").value)||0,amount:Number($("fAmount").value)||0,status:$("fStatus").value};
+ const data={name:$("fName").value.trim(),type:$("fType").value,date:$("fDate").value,totalSeats:Number($("fSeats").value)||0,amount:Number($("fAmount").value)\vert{}\vert{}0,status:$("fStatus").value};
  if(!data.name)return;
  if(data.totalSeats>0 && id){const t=trips.find(x=>x.id===id);if(data.totalSeats<(t.members||[]).length){showToast("Total seats cannot be below booked passengers");return}}
  const ref=id?db.collection("trips").doc(id):db.collection("trips").doc();
@@ -349,7 +471,7 @@ function openPaymentForm(tripId){
  const t=trips.find(x=>x.id===tripId);if(!t)return;
  $("modalTitle").textContent="Record payment";
  $("modalBody").innerHTML=`<form onsubmit="savePayment(event)">
- <div class="form-grid"><div class="field full"><label>Passenger</label><select required id="payPax" class="input">${(t.members||[]).map((m,i)=>`<option value="${i}">${esc(m.name||"Unnamed")} — ${money(dueFor(t,m))} due</option>`).join("")}</select></div>
+ <div class="form-grid"><div class="field full"><label>Passenger</label><select required id="payPax" class="input">${(t.members||[]).map((m,i)=>`<option value="${i}">${esc(m.name\vert{}\vert{}"Unnamed")} — ${money(dueFor(t,m))} due</option>`).join("")}</select></div>
  <div class="field"><label>Amount (₹)</label><input required id="payAmount" type="number" min="1" class="input"></div>
  <div class="field"><label>Date</label><input required id="payDate" type="date" class="input" value="${new Date().toISOString().slice(0,10)}"></div>
  <div class="field"><label>Method</label><select id="payMethod" class="input"><option>UPI</option><option>Cash</option><option>Bank Transfer</option><option>Card</option><option>Other</option></select></div>
